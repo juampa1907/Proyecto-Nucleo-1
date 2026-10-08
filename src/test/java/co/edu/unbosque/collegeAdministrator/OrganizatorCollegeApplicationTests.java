@@ -1,4 +1,4 @@
-package co.edu.unbosque.OrganizatorCollege;
+package co.edu.unbosque.collegeAdministrator;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
