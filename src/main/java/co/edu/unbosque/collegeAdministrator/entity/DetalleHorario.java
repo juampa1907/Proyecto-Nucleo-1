@@ -1,81 +1,64 @@
 package co.edu.unbosque.collegeAdministrator.entity;
 
-import co.edu.unbosque.collegeAdministrator.entity.enums.DiaSemana;
 import jakarta.persistence.*;
-
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "DETALLE_HORARIO")
-public class DetalleHorario{
+public class DetalleHorario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_DETALLE_HORARIO")
-    private Integer idHorario;
+    private Integer idDetalleHorario;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "DIA_SEMANA", nullable = false, length = 15)
-    private DiaSemana diaSemana;
-
-    @Column(name = "HORA_INICIO", nullable = false)
-    private LocalTime horaInicio;
-
-    @Column(name = "HORA_FIN", nullable = false)
-    private LocalTime horaFin;
+    @Embedded
+    private FranjaHoraria franja;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_MATERIA", nullable = false)
-    private Materia materia;
+    @JoinColumn(name = "ID_GRUPO", nullable = false)
+    private Grupo grupo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_AULA")
+    private Aula aula;
 
     public DetalleHorario() {
     }
 
-    public DetalleHorario(Integer idHorario, DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFin, Materia materia) {
-        this.idHorario = idHorario;
-        this.diaSemana = diaSemana;
-        this.horaInicio = horaInicio;
-        this.horaFin = horaFin;
-        this.materia = materia;
+    public DetalleHorario(FranjaHoraria franja, Aula aula) {
+        this.franja = franja;
+        this.aula = aula;
     }
 
-    public Integer getIdHorario() {
-        return idHorario;
+    public Integer getIdDetalleHorario() {
+        return idDetalleHorario;
     }
 
-    public void setIdHorario(Integer idHorario) {
-        this.idHorario = idHorario;
+    public void setIdDetalleHorario(Integer idDetalleHorario) {
+        this.idDetalleHorario = idDetalleHorario;
     }
 
-    public DiaSemana getDiaSemana() {
-        return diaSemana;
+    public FranjaHoraria getFranja() {
+        return franja;
     }
 
-    public void setDiaSemana(DiaSemana diaSemana) {
-        this.diaSemana = diaSemana;
+    public void setFranja(FranjaHoraria franja) {
+        this.franja = franja;
     }
 
-    public LocalTime getHoraInicio() {
-        return horaInicio;
+    public Grupo getGrupo() {
+        return grupo;
     }
 
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
+    void setGrupo(Grupo grupo) {
+        this.grupo = grupo;
     }
 
-    public LocalTime getHoraFin() {
-        return horaFin;
+    public Aula getAula() {
+        return aula;
     }
 
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
-    }
-
-    public Materia getMateria() {
-        return materia;
-    }
-
-    public void setMateria(Materia materia) {
-        this.materia = materia;
+    public void setAula(Aula aula) {
+        this.aula = aula;
     }
 }

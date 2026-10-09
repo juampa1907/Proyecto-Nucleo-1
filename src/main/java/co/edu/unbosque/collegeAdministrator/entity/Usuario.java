@@ -1,8 +1,12 @@
 package co.edu.unbosque.collegeAdministrator.entity;
 
+import co.edu.unbosque.collegeAdministrator.entity.enums.Rol;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "USUARIO")
@@ -23,33 +27,47 @@ public class Usuario {
     @Column(name = "PASSWORD", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "ID_ROL")
-    private Integer idRol;
-
-    @Column(name = "INTENTOS")
-    private Integer intentos;
+    @Column(name = "INTENTOS", nullable = false)
+    private int intentos = 0;
 
     @Column(name = "FECHA_INIT_SESION")
     private LocalDateTime fechaInitSesion;
 
+    @Column(name = "IP_ULTIMO_INICIO_SESION", length = 45)
+    private String ipUltimoInicioSesion;
+
+    @Column(name = "BLOQUEADO_HASTA")
+    private LocalDateTime bloqueadoHasta;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "USUARIO_ROL", joinColumns = @JoinColumn(name = "ID_USUARIO"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROL", nullable = false, length = 30)
+    private Set<Rol> roles = new HashSet<>();
+
     public Usuario() {
     }
 
-    public Usuario(Integer idUsuario, String username, String correo, String password, Integer idRol, Integer intentos, LocalDateTime fechaInitSesion) {
-        this.idUsuario = idUsuario;
+    public Usuario(String username, String correo, String password) {
         this.username = username;
         this.correo = correo;
         this.password = password;
-        this.idRol = idRol;
-        this.intentos = intentos;
-        this.fechaInitSesion = fechaInitSesion;
     }
 
-    public Integer getId() {
+    protected Usuario(Rol rolInicial) {
+        this.roles.add(rolInicial);
+    }
+
+    protected Usuario(String username, String correo, String password, Rol rolInicial) {
+        this(username, correo, password);
+        this.roles.add(rolInicial);
+    }
+
+    public Integer getIdUsuario() {
         return idUsuario;
     }
 
-    public void setId(Integer idUsuario) {
+    public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
 
@@ -77,19 +95,11 @@ public class Usuario {
         this.password = password;
     }
 
-    public Integer getIdRol() {
-        return idRol;
-    }
-
-    public void setIdRol(Integer idRol) {
-        this.idRol = idRol;
-    }
-
-    public Integer getIntentos() {
+    public int getIntentos() {
         return intentos;
     }
 
-    public void setIntentos(Integer intentos) {
+    public void setIntentos(int intentos) {
         this.intentos = intentos;
     }
 
@@ -99,5 +109,37 @@ public class Usuario {
 
     public void setFechaInitSesion(LocalDateTime fechaInitSesion) {
         this.fechaInitSesion = fechaInitSesion;
+    }
+
+    public String getIpUltimoInicioSesion() {
+        return ipUltimoInicioSesion;
+    }
+
+    public void setIpUltimoInicioSesion(String ipUltimoInicioSesion) {
+        this.ipUltimoInicioSesion = ipUltimoInicioSesion;
+    }
+
+    public LocalDateTime getBloqueadoHasta() {
+        return bloqueadoHasta;
+    }
+
+    public void setBloqueadoHasta(LocalDateTime bloqueadoHasta) {
+        this.bloqueadoHasta = bloqueadoHasta;
+    }
+
+    public Set<Rol> getRoles() {
+        return Collections.unmodifiableSet(roles);
+    }
+
+    public final void agregarRol(Rol rol) {
+        roles.add(rol);
+    }
+
+    public final void quitarRol(Rol rol) {
+        roles.remove(rol);
+    }
+
+    public final boolean tieneRol(Rol rol) {
+        return roles.contains(rol);
     }
 }

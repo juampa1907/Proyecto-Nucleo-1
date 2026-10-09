@@ -2,6 +2,8 @@ package co.edu.unbosque.collegeAdministrator.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -19,21 +21,23 @@ public class Materia {
     @Column(name = "CREDITOS", nullable = false)
     private Integer numeroCreditos;
 
-    @Column(name = "PRERREQUISITOS")
-    private List<Materia> prerrequisitos;
+    @ManyToMany
+    @JoinTable(
+            name = "MATERIA_PRERREQUISITO",
+            joinColumns = @JoinColumn(name = "ID_MATERIA"),
+            inverseJoinColumns = @JoinColumn(name = "ID_PRERREQUISITO")
+    )
+    private List<Materia> prerrequisitos = new ArrayList<>();
 
-    @Column(name = "DOCENTE", nullable = false)
-    private Docente docente;
+    @OneToMany(mappedBy = "materia")
+    private List<Grupo> grupos = new ArrayList<>();
 
     public Materia() {
     }
 
-    public Materia(Integer idMateria, String nombre, Integer numeroCreditos, List<Materia> prerrequisitos, Docente docente) {
-        this.idMateria = idMateria;
+    public Materia(String nombre, Integer numeroCreditos) {
         this.nombre = nombre;
         this.numeroCreditos = numeroCreditos;
-        this.prerrequisitos = prerrequisitos;
-        this.docente = docente;
     }
 
     public Integer getIdMateria() {
@@ -61,18 +65,18 @@ public class Materia {
     }
 
     public List<Materia> getPrerrequisitos() {
-        return prerrequisitos;
+        return Collections.unmodifiableList(prerrequisitos);
     }
 
-    public void setPrerrequisitos(List<Materia> prerrequisitos) {
-        this.prerrequisitos = prerrequisitos;
+    public void agregarPrerrequisito(Materia prerrequisito) {
+        prerrequisitos.add(prerrequisito);
     }
 
-    public Docente getDocente() {
-        return docente;
+    public void quitarPrerrequisito(Materia prerrequisito) {
+        prerrequisitos.remove(prerrequisito);
     }
 
-    public void setDocente(Docente docente) {
-        this.docente = docente;
+    public List<Grupo> getGrupos() {
+        return Collections.unmodifiableList(grupos);
     }
 }
