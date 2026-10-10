@@ -22,12 +22,21 @@ public class DetalleHorario {
     @JoinColumn(name = "ID_AULA")
     private Aula aula;
 
+    // ESP-F-05: los auditorios solo se asignan de forma manual y marcada como excepcional.
+    @Column(name = "USO_EXCEPCIONAL", nullable = false)
+    private boolean usoExcepcional;
+
     public DetalleHorario() {
     }
 
-    public DetalleHorario(FranjaHoraria franja, Aula aula) {
+    public DetalleHorario(FranjaHoraria franja, Aula aula, boolean usoExcepcional) {
         this.franja = franja;
         this.aula = aula;
+        this.usoExcepcional = usoExcepcional;
+    }
+
+    public boolean isUsoExcepcional() {
+        return usoExcepcional;
     }
 
     public Integer getIdDetalleHorario() {

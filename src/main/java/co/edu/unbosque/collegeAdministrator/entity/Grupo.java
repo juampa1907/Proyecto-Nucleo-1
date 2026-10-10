@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
-@Table(name = "GRUPO", uniqueConstraints = @UniqueConstraint(columnNames = {"ID_MATERIA", "CODIGO"}))
+@Table(name = "GRUPO", uniqueConstraints = @UniqueConstraint(columnNames = {"ID_PERIODO", "ID_MATERIA", "CODIGO"}))
 public class Grupo {
 
     @Id
@@ -22,6 +22,10 @@ public class Grupo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_MATERIA", nullable = false)
     private Materia materia;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_PERIODO", nullable = false)
+    private PeriodoAcademico periodo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_DOCENTE")
@@ -43,10 +47,15 @@ public class Grupo {
     public Grupo() {
     }
 
-    public Grupo(String codigo, Materia materia, Integer cupoMaximo) {
+    public Grupo(String codigo, Materia materia, PeriodoAcademico periodo, Integer cupoMaximo) {
         this.codigo = codigo;
         this.materia = materia;
+        this.periodo = periodo;
         this.cupoMaximo = cupoMaximo;
+    }
+
+    public PeriodoAcademico getPeriodo() {
+        return periodo;
     }
 
     public Integer getIdGrupo() {
@@ -115,7 +124,9 @@ public class Grupo {
         return Collections.unmodifiableList(inscripciones);
     }
 
-    public int getCuposDisponibles() {
-        return cupoMaximo - inscripciones.size();
+    public double calcularHorasSemanales() {
+        return sesiones.stream()
+                .mapToDouble(sesion -> sesion.getFranja().calcularHoras())
+                .sum();
     }
 }

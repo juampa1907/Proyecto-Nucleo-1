@@ -6,6 +6,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 @Embeddable
@@ -52,5 +53,18 @@ public class FranjaHoraria {
         return diaSemana == otra.diaSemana
                 && horaInicio.isBefore(otra.horaFin)
                 && otra.horaInicio.isBefore(horaFin);
+    }
+
+    public long calcularMinutos() {
+        return Duration.between(horaInicio, horaFin).toMinutes();
+    }
+
+    public double calcularHoras() {
+        return calcularMinutos() / 60.0;
+    }
+
+    @Override
+    public String toString() {
+        return diaSemana + " " + horaInicio + "-" + horaFin;
     }
 }
