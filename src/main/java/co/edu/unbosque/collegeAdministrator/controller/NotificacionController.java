@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Notificaciones del usuario autenticado (HU-39 a HU-41). Cada usuario solo ve las suyas.
- */
+
 @RestController
 @RequestMapping("/api/notificaciones")
 @PreAuthorize(Permisos.AUTENTICADO)

@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * HU-27, HU-46 a HU-49 / RF-31: parámetros institucionales editables sin tocar código.
- */
+
 @RestController
 @RequestMapping("/api/parametros")
 public class ParametrosController {

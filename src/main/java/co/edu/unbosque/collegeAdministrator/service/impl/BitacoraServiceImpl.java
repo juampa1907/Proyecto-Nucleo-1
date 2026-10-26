@@ -25,7 +25,6 @@ public class BitacoraServiceImpl implements BitacoraServiceAPI {
         this.usuarioActual = usuarioActual;
     }
 
-    // Se guarda en la misma transacción que la acción: si la acción se revierte, el registro también.
     @Override
     public void registrar(String accion, String detalle) {
         String detalleRecortado = detalle != null && detalle.length() > LONGITUD_MAXIMA_DETALLE

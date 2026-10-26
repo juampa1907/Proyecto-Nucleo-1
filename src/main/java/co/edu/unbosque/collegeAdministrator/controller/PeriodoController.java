@@ -33,11 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Periodo académico y todo lo que opera sobre el horario completo del periodo:
- * publicación (HU-28), generación automática (HU-24), versiones (HU-29), cierre de grupos (HU-35),
- * observaciones de docentes (HU-55) y presupuesto por vinculación (HU-43).
- */
+
 @RestController
 @RequestMapping("/api/periodos")
 public class PeriodoController {
@@ -114,9 +110,7 @@ public class PeriodoController {
         return versionHorarioService.listarVersiones(id).stream().map(HorarioMapper::aResponse).toList();
     }
 
-    /**
-     * Devuelve la versión de respaldo que se guarda automáticamente antes de restaurar.
-     */
+
     @PostMapping("/versiones/{idVersion}/restaurar")
     @PreAuthorize(Permisos.DIRECCION)
     public VersionHorarioResponse restaurarVersion(@PathVariable Integer idVersion) {

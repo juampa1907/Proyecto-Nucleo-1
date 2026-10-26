@@ -23,10 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * HU-01 / HU-02: autenticación con JWT, sin sesión en el servidor.
- * Los permisos por rol se declaran en los controladores con @PreAuthorize (de ahí @EnableMethodSecurity).
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -43,7 +40,7 @@ public class SecurityConfig {
         this.urlFrontend = urlFrontend;
     }
 
-    // Permite que el frontend (app.url-frontend, otro origen) llame a la API desde el navegador.
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuracion = new CorsConfiguration();
@@ -56,7 +53,7 @@ public class SecurityConfig {
         return fuente;
     }
 
-    // Estático para que los servicios que hashean contraseñas no dependan de esta clase (evita ciclos de beans).
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

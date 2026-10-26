@@ -65,7 +65,6 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return guardado;
     }
 
-    // HU-02: el administrador asigna roles como DIRECTOR_PROGRAMA o DECANO a un usuario existente.
     @Override
     public Usuario asignarRol(Integer idUsuario, Rol rol) {
         Usuario usuario = buscarPorId(idUsuario);

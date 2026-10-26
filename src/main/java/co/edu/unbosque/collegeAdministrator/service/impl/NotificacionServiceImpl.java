@@ -28,7 +28,6 @@ public class NotificacionServiceImpl implements NotificacionServiceAPI {
     private final boolean correoHabilitado;
     private final String remitente;
 
-    // ObjectProvider: el JavaMailSender solo existe si spring.mail.host está configurado.
     public NotificacionServiceImpl(NotificacionRepository notificacionRepository,
                                    ObjectProvider<JavaMailSender> mailSender,
                                    @Value("${app.notificaciones.correo-habilitado:false}") boolean correoHabilitado,
@@ -66,7 +65,6 @@ public class NotificacionServiceImpl implements NotificacionServiceAPI {
         return notificacion;
     }
 
-    // Un fallo de correo se registra en el log y no interrumpe la operación que generó la notificación.
     private boolean enviarCorreo(String destinatario, String asunto, String mensaje) {
         if (!correoHabilitado) {
             return false;

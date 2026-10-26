@@ -33,7 +33,6 @@ public class ObservacionAsignacionServiceImpl extends GenericServiceImpl<Observa
         return observacionAsignacionRepository;
     }
 
-    // HU-55: el docente revisa su asignación en borrador y deja una observación para el Director.
     @Override
     public ObservacionAsignacion registrar(Integer idGrupo, Integer idDocente, String texto) {
         if (texto == null || texto.isBlank()) {

@@ -10,9 +10,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
-/**
- * @param caracteristicas opcional; al actualizar, reemplaza las características actuales.
- */
+
 public record AulaRequest(
         @NotBlank @Size(max = 20) String codigo,
         @NotNull @Positive Integer capacidad,

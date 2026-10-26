@@ -16,9 +16,7 @@ import co.edu.unbosque.collegeAdministrator.entity.Usuario;
 
 import java.util.Comparator;
 
-/**
- * Usuarios, estudiantes, docentes y tipos de vinculación. Ninguna respuesta incluye la contraseña.
- */
+
 public final class UsuarioMapper {
 
     private UsuarioMapper() {

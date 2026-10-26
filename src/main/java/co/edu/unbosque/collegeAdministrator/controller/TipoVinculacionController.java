@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * HU-06 / RF-31: tipos de vinculación parametrizables (tiempo completo, 3/4, 1/2, 1/4).
- */
+
 @RestController
 @RequestMapping("/api/tipos-vinculacion")
 public class TipoVinculacionController {

@@ -14,11 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Lee el encabezado "Authorization: Bearer <token>" y, si el token es válido y la cuenta sigue habilitada
- * y sin bloqueo, autentica la petición. Si no, la petición sigue sin autenticar y Spring Security la rechaza.
- * No es un @Component para que no se registre dos veces (como filtro de servlet y en la cadena de seguridad).
- */
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PREFIJO = "Bearer ";

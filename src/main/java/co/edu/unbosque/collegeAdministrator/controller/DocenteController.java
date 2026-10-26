@@ -30,10 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * HU-05 a HU-10 y HU-55. El perfil lo administra el ADMINISTRADOR; las restricciones horarias las registra
- * el propio docente (HU-07); las consultas las ve el docente, el director, el decano o el administrador.
- */
+
 @RestController
 @RequestMapping("/api/docentes")
 public class DocenteController {

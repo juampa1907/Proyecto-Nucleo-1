@@ -22,9 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * HU-02 (roles) y HU-04 (último inicio de sesión de cada usuario).
- */
+
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {

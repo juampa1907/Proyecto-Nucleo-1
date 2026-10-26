@@ -115,7 +115,6 @@ public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
         }
     }
 
-    // Un @Embeddable no debe compartirse entre entidades: cada sesión lleva su propia copia de la franja.
     private FranjaHoraria copiar(FranjaHoraria franja) {
         return new FranjaHoraria(franja.getDiaSemana(), franja.getHoraInicio(), franja.getHoraFin());
     }

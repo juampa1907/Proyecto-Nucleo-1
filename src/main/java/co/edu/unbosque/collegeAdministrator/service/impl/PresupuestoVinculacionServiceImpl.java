@@ -37,7 +37,6 @@ public class PresupuestoVinculacionServiceImpl extends GenericServiceImpl<Presup
         return presupuestoVinculacionRepository;
     }
 
-    // Si ya hay presupuesto para ese periodo y tipo, se actualiza en lugar de duplicarlo.
     @Override
     public PresupuestoVinculacion registrar(Integer idPeriodo, Integer idTipoVinculacion, Integer horasPresupuestadas) {
         if (horasPresupuestadas == null || horasPresupuestadas < 0) {

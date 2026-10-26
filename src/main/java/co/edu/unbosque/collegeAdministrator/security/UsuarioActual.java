@@ -12,10 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-/**
- * Acceso al usuario autenticado. HU-53: los controladores llaman a {@link #verificarPropietarioOAlgunRol}
- * para que un estudiante o docente solo consulte sus propios datos.
- */
+
 @Component
 public class UsuarioActual {
 
@@ -27,9 +24,7 @@ public class UsuarioActual {
         this.usuarioRepository = usuarioRepository;
     }
 
-    /**
-     * @return el username autenticado o "sistema" (tareas programadas, datos iniciales).
-     */
+
     public String obtenerUsername() {
         Authentication autenticacion = SecurityContextHolder.getContext().getAuthentication();
         if (autenticacion == null || !autenticacion.isAuthenticated()
@@ -63,9 +58,7 @@ public class UsuarioActual {
         verificarPropietarioOAlgunRol(idUsuario, Rol.ADMINISTRADOR);
     }
 
-    /**
-     * Permite el acceso si el usuario autenticado es el dueño de los datos o tiene alguno de los roles indicados.
-     */
+
     public void verificarPropietarioOAlgunRol(Integer idUsuario, Rol... rolesAutorizados) {
         if (tieneAlgunRol(rolesAutorizados)) {
             return;

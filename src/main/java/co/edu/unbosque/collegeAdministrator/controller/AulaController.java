@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Set;
 
-/**
- * HU-16, HU-17, HU-19, ESP-F-07. Las aulas no se eliminan: se desactivan, porque los horarios pasados las referencian.
- */
+
 @RestController
 @RequestMapping("/api/aulas")
 public class AulaController {
@@ -39,9 +37,7 @@ public class AulaController {
         this.aulaService = aulaService;
     }
 
-    /**
-     * Aulas activas, opcionalmente de un bloque (edificio) y de un tipo de espacio.
-     */
+
     @GetMapping
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<AulaResponse> listar(@RequestParam(required = false) Bloque bloque,
@@ -86,7 +82,7 @@ public class AulaController {
         return AcademicoMapper.aResponse(aulaService.desactivar(id));
     }
 
-    // RF-22: aulas compatibles por capacidad, características y sede (sin auditorios).
+
     @GetMapping("/sugerencias")
     @PreAuthorize(Permisos.DIRECCION)
     public List<AulaResponse> sugerencias(@RequestParam Integer capacidad,

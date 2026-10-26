@@ -43,7 +43,7 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         if (aula.getBloque() == null) {
             throw new ReglaNegocioException("El bloque del aula es obligatorio");
         }
-        // ESP-F-03: las aulas de cómputo existen solo en la sede Usaquén.
+
         boolean esDeComputo = aula.getTipoEspacio() == TipoEspacio.COMPUTO
                 || aula.tieneCaracteristica(CaracteristicaAula.COMPUTADORES);
         if (esDeComputo && aula.getBloque().getSede() != Sede.USAQUEN) {
@@ -55,7 +55,6 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         return super.guardar(aula);
     }
 
-    // ESP-F-02 / ESP-F-04: no se registran más aulas de un tipo que las del inventario real de la sede.
     private void validarTopeInventario(Aula aula) {
         Sede sede = aula.getBloque().getSede();
         limiteInventarioAulaRepository.findByTipoEspacioAndSede(aula.getTipoEspacio(), sede).ifPresent(limite -> {
@@ -73,7 +72,6 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
                 .toList();
     }
 
-    // ESP-F-07: por ejemplo, los espacios multipropósito de un edificio específico.
     @Override
     @Transactional(readOnly = true)
     public List<Aula> listarPorBloqueYTipo(Bloque bloque, TipoEspacio tipoEspacio) {
@@ -99,7 +97,6 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         return aula;
     }
 
-    // RF-22 / ESP-F-05: aulas activas, con capacidad y requisitos suficientes, sin auditorios.
     @Override
     @Transactional(readOnly = true)
     public List<Aula> sugerirAulas(Integer capacidadMinima, Set<CaracteristicaAula> requisitos, Sede sede) {

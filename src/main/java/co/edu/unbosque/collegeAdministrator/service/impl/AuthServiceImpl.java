@@ -58,7 +58,6 @@ public class AuthServiceImpl implements AuthServiceAPI {
         this.urlFrontend = urlFrontend;
     }
 
-    // noRollbackFor: el intento fallido debe quedar guardado aunque el login termine en error.
     @Override
     @Transactional(noRollbackFor = AutenticacionException.class)
     public RespuestaLogin login(String username, String password, String ip) {

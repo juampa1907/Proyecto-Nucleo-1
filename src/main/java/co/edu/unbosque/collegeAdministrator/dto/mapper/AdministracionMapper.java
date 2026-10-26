@@ -9,9 +9,7 @@ import co.edu.unbosque.collegeAdministrator.entity.Notificacion;
 import co.edu.unbosque.collegeAdministrator.entity.PresupuestoVinculacion;
 import co.edu.unbosque.collegeAdministrator.entity.RegistroBitacora;
 
-/**
- * Notificaciones, presupuesto, topes de inventario y bitácora.
- */
+
 public final class AdministracionMapper {
 
     private AdministracionMapper() {

@@ -47,9 +47,6 @@ public class JwtService {
                 .compact();
     }
 
-    /**
-     * Lanza {@link io.jsonwebtoken.JwtException} si el token es inválido, está alterado o expiró.
-     */
     public String extraerUsername(String token) {
         return leerClaims(token).getSubject();
     }

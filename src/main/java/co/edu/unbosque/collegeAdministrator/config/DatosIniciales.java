@@ -16,12 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Al arrancar crea, si no existen:
- * - los parámetros académicos por defecto;
- * - los topes de inventario de aulas del documento de requisitos (secciones 6.1 y 6.2);
- * - un administrador inicial, porque todos los endpoints (salvo /auth) exigen autenticación.
- */
+
 @Component
 public class DatosIniciales implements CommandLineRunner {
 

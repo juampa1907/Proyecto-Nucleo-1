@@ -20,9 +20,5 @@ public interface AulaServiceAPI extends GenericServiceAPI<Aula, Integer> {
 
     Aula desactivar(Integer idAula);
 
-    /**
-     * @param requisitos opcional: vacío o null si la materia no exige ninguna característica.
-     * @param sede       opcional: null para buscar en todas las sedes.
-     */
     List<Aula> sugerirAulas(Integer capacidadMinima, Set<CaracteristicaAula> requisitos, Sede sede);
 }

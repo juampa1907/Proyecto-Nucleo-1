@@ -10,10 +10,7 @@ public interface UsuarioServiceAPI extends GenericServiceAPI<Usuario, Integer> {
 
     void validarDatosUnicos(String username, String correo);
 
-    /**
-     * Antes de guardar un usuario nuevo (de cualquier tipo): valida username, correo y contraseña,
-     * y reemplaza la contraseña por su hash.
-     */
+
     void prepararNuevoUsuario(Usuario usuario);
 
     Usuario crearAdministrador(String username, String correo, String password);

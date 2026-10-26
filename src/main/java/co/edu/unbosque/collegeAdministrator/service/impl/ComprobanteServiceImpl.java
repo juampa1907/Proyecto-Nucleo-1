@@ -35,10 +35,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * La "firma digital del sistema" (HU-37) es un código de verificación SHA-256 calculado sobre el contenido del
- * comprobante: si alguien altera los datos, el código ya no coincide. No es una firma con certificado digital.
- */
+
 @Service
 @Transactional
 public class ComprobanteServiceImpl implements ComprobanteServiceAPI {

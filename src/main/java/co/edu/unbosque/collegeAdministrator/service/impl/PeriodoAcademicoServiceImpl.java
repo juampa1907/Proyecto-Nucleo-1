@@ -92,7 +92,6 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         return periodo;
     }
 
-    // HU-28: solo se publica un horario completo y sin observaciones pendientes (HU-55).
     @Override
     public PeriodoAcademico publicarHorario(Integer idPeriodo) {
         PeriodoAcademico periodo = buscarPorId(idPeriodo);
@@ -129,7 +128,6 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         return periodo;
     }
 
-    // HU-40: avisa a los estudiantes N días antes de la apertura y del cierre de inscripción, una sola vez cada uno.
     @Override
     public void enviarAvisosInscripcion(LocalDate hoy) {
         int dias = parametrosAcademicosService.obtener().getDiasAnticipacionAviso();
@@ -160,7 +158,6 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         estudianteRepository.findAll().forEach(estudiante -> notificacionService.notificar(estudiante, asunto, mensaje));
     }
 
-    // HU-39: cada docente recibe su horario el mismo día de la publicación.
     private void notificarHorarioADocentes(PeriodoAcademico periodo, List<Grupo> grupos) {
         Map<Docente, List<Grupo>> gruposPorDocente = grupos.stream()
                 .collect(Collectors.groupingBy(Grupo::getDocente, LinkedHashMap::new, Collectors.toList()));

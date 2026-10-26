@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * HU-52: bitácora de cambios. Sin fechas, devuelve los últimos 7 días. Fechas en formato ISO (2026-10-09T08:00:00).
- */
+
 @RestController
 @RequestMapping("/api/bitacora")
 @PreAuthorize(Permisos.ADMIN)

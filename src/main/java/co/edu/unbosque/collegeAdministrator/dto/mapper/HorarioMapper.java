@@ -12,17 +12,12 @@ import co.edu.unbosque.collegeAdministrator.entity.VersionHorario;
 
 import java.util.Comparator;
 
-/**
- * Grupos, sesiones, observaciones y versiones del horario.
- */
 public final class HorarioMapper {
 
     private HorarioMapper() {
     }
 
-    /**
-     * @param cuposDisponibles se calcula en el servicio (cuenta inscripciones en la base de datos).
-     */
+
     public static GrupoResponse aResponse(Grupo grupo, long cuposDisponibles) {
         return new GrupoResponse(grupo.getIdGrupo(), grupo.getCodigo(), AcademicoMapper.aResumen(grupo.getMateria()),
                 grupo.getPeriodo().getIdPeriodo(), grupo.getPeriodo().getCodigo(),

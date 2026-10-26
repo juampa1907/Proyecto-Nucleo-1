@@ -23,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * HU-31 a HU-38. El estudiante se inscribe a sí mismo (el id sale del token, no del cuerpo).
- */
 @RestController
 @RequestMapping("/api/inscripciones")
 public class InscripcionController {
@@ -54,7 +51,7 @@ public class InscripcionController {
         return ResponseEntity.noContent().build();
     }
 
-    // Solo el docente del grupo (o el administrador) registra la nota.
+
     @PutMapping("/{id}/nota")
     @PreAuthorize(Permisos.DOCENTE_O_ADMIN)
     public InscripcionResponse registrarNota(@PathVariable Integer id, @Valid @RequestBody NotaRequest request) {

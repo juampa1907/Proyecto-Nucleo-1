@@ -37,9 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Las consultas de un estudiante solo las ve él mismo, el director de programa o el administrador (HU-53).
- */
+
 @RestController
 @RequestMapping("/api/estudiantes")
 public class EstudianteController {
@@ -91,9 +89,7 @@ public class EstudianteController {
         return UsuarioMapper.aResponse(estudianteService.buscarPorId(id));
     }
 
-    /**
-     * @param estado opcional: sin él devuelve todo el historial.
-     */
+
     @GetMapping("/{id}/inscripciones")
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<InscripcionResponse> inscripciones(@PathVariable Integer id,
@@ -112,7 +108,7 @@ public class EstudianteController {
         return estudianteService.listarMateriasActuales(id).stream().map(AcademicoMapper::aResumen).toList();
     }
 
-    // Horario del estudiante en un periodo: los grupos que tiene inscritos, con sus sesiones.
+
     @GetMapping("/{id}/horario")
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<GrupoResponse> horario(@PathVariable Integer id, @RequestParam Integer idPeriodo) {
@@ -123,7 +119,7 @@ public class EstudianteController {
                 .toList();
     }
 
-    // HU-37: comprobante PDF de la carga académica.
+
     @GetMapping("/{id}/comprobante")
     @PreAuthorize(Permisos.AUTENTICADO)
     public ResponseEntity<byte[]> comprobante(@PathVariable Integer id, @RequestParam Integer idPeriodo) {

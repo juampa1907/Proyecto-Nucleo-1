@@ -11,8 +11,5 @@ public interface PeriodoAcademicoServiceAPI extends GenericServiceAPI<PeriodoAca
 
     PeriodoAcademico publicarHorario(Integer idPeriodo);
 
-    /**
-     * HU-40: lo invoca la tarea programada diaria.
-     */
     void enviarAvisosInscripcion(LocalDate hoy);
 }

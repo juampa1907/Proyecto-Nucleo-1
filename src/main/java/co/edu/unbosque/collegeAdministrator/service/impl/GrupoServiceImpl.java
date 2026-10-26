@@ -85,7 +85,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupoRepository;
     }
 
-    // HU-14, HU-34, HU-46: el cupo queda guardado en el grupo; un cambio posterior del parámetro no lo afecta.
     @Override
     public Grupo crearGrupo(Integer idPeriodo, Integer idMateria, String codigo, Integer cupoMaximo) {
         if (codigo == null || codigo.isBlank()) {
@@ -209,7 +208,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return advertencias;
     }
 
-    // HU-19: aulas con capacidad para el cupo del grupo y con los requisitos de la materia.
     @Override
     @Transactional(readOnly = true)
     public List<Aula> sugerirAulas(Integer idGrupo) {
@@ -227,8 +225,7 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
-    // HU-35 (alerta previa) y HU-44: grupos abiertos con menos inscritos que el mínimo configurado.
-    // Sin readOnly: obtener() puede crear la fila de parámetros la primera vez.
+
     @Override
     public List<Grupo> listarGruposEnRiesgo(Integer idPeriodo) {
         Integer minimo = parametrosAcademicosService.obtener().getMinimoEstudiantesGrupo();
@@ -240,7 +237,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
                 .toList();
     }
 
-    // HU-35: el cierre se ejecuta al finalizar la inscripción.
     @Override
     public List<Grupo> cerrarGruposBajoMinimo(Integer idPeriodo) {
         PeriodoAcademico periodo = periodoAcademicoService.buscarPorId(idPeriodo);
@@ -315,7 +311,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return sesion;
     }
 
-    // Todas las validaciones de una sesión nueva, en orden; la primera que falla lanza ReglaNegocioException.
     private void validarSesion(Grupo grupo, FranjaHoraria franja, Integer idAula, boolean usoExcepcional) {
         if (franja == null) {
             throw new ReglaNegocioException("La franja horaria es obligatoria");
@@ -342,7 +337,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
-    // HU-28: una vez publicado, el horario no cambia (se evitan los cambios de última hora).
     private void validarHorarioEditable(PeriodoAcademico periodo) {
         validarPeriodoNoCerrado(periodo);
         if (periodo.horarioPublicado()) {
@@ -357,7 +351,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
-    // HU-12, HU-20, HU-21, HU-22, HU-49: reglas parametrizadas de la sesión.
     private void validarFranjaConParametros(Grupo grupo, FranjaHoraria franja) {
         ParametrosAcademicos parametros = parametrosAcademicosService.obtener();
         if (franja.calcularMinutos() != parametros.getDuracionSesionMinutos()) {
@@ -378,8 +371,7 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
-    // HU-13, RF-21, ESP-F-05: aula activa, con capacidad, con los requisitos de la materia, libre en la franja,
-    // y si es auditorio, solo como uso excepcional.
+
     private void validarAula(Aula aula, Grupo grupo, FranjaHoraria franja, boolean usoExcepcional) {
         if (!aula.isActiva()) {
             throw new ReglaNegocioException("El aula " + aula.getCodigo() + " está inactiva");
@@ -409,7 +401,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
                 });
     }
 
-    // RF-08, RF-09, RF-10, RF-11: validaciones del docente frente a las franjas que se le asignan.
     private void validarDocente(Docente docente, Grupo grupo, List<FranjaHoraria> franjas, double horasNuevas) {
         boolean habilitado = docente.getMateriasHabilitadas().stream()
                 .anyMatch(m -> m.getIdMateria().equals(grupo.getMateria().getIdMateria()));
@@ -449,7 +440,6 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
-    // HU-41: cada estudiante del grupo cerrado recibe las opciones de grupos alternativos con cupo.
     private void notificarCierre(Grupo grupo) {
         List<InscripcionMateria> afectados = inscripcionMateriaRepository.findByGrupo_IdGrupoAndEstado(
                 grupo.getIdGrupo(), EstadoMateria.CURSANDO);

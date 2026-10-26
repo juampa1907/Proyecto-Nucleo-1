@@ -6,9 +6,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/**
- * Fechas en formato "yyyy-MM-dd".
- */
+
 public record PeriodoRequest(
         @NotBlank @Size(max = 20) String codigo,
         @NotNull LocalDate fechaInicio,

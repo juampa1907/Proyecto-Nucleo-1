@@ -147,7 +147,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         return inscripcionMateriaRepository.findByEstudiante_IdUsuarioAndEstado(idEstudiante, estado);
     }
 
-    // HU-36: cada estudiante se evalúa por separado; los que no se pueden mover quedan en el resultado con su motivo.
     @Override
     public ResultadoReasignacion reasignarEstudiantes(Integer idGrupoOrigen, Integer idGrupoDestino) {
         Grupo origen = grupoService.buscarPorId(idGrupoOrigen);
@@ -226,7 +225,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
                 .toList();
     }
 
-    // HU-31, HU-50, HU-51: solo dentro de las fechas del periodo y nunca en un periodo cerrado.
     private void validarPeriodoDeInscripcion(PeriodoAcademico periodo) {
         if (periodo.estaCerrado()) {
             throw new ReglaNegocioException("El periodo " + periodo.getCodigo() + " está cerrado");
@@ -237,7 +235,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
-    // HU-38: con la matrícula ya confirmada, cancelar no puede dejar al estudiante por debajo del mínimo.
     private void validarMinimoTrasCancelar(InscripcionMateria inscripcion, PeriodoAcademico periodo) {
         Integer minimo = parametrosAcademicosService.obtener().getCreditosMinimos();
         if (minimo == null) {
@@ -264,7 +261,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
                 .sum();
     }
 
-    // HU-15: cada correquisito debe estar aprobado o cursándose.
     private void validarCorrequisitos(Estudiante estudiante, Materia materia) {
         Set<Integer> aprobadasOCursando = estudiante.getHistorialInscripciones().stream()
                 .filter(ins -> ins.getEstado() == EstadoMateria.APROBADA || ins.getEstado() == EstadoMateria.CURSANDO)
@@ -278,7 +274,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
-    // HU-38: el máximo se valida al inscribir; el mínimo, al confirmar la matrícula.
     private void validarCreditosMaximos(Estudiante estudiante, Materia materia) {
         Integer maximo = parametrosAcademicosService.obtener().getCreditosMaximos();
         if (maximo == null) {
@@ -307,7 +302,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
-    // RF-37: el mensaje indica cuál prerrequisito falta.
     private void validarPrerrequisitos(Estudiante estudiante, Materia materia) {
         Set<Integer> aprobadas = estudiante.getMateriasCursadas().stream()
                 .map(Materia::getIdMateria)
@@ -320,7 +314,6 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
-    // RF-36: devuelve el conflicto exacto (materia y franja) o null. "excluida" es la inscripción que se está moviendo.
     private String buscarCruce(Estudiante estudiante, Grupo grupoNuevo, InscripcionMateria excluida) {
         for (InscripcionMateria actual : estudiante.getHistorialInscripciones()) {
             if (actual == excluida || actual.getEstado() != EstadoMateria.CURSANDO) {

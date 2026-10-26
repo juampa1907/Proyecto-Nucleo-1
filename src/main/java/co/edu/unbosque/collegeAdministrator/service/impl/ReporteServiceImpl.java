@@ -229,7 +229,6 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
                 List.of("Materia", "Grupo", "Docente", "Día", "Inicio", "Fin", "Aula", "Edificio"), filas);
     }
 
-    // HU-08: sobreasignado si supera su máximo; subutilizado si queda por debajo del umbral configurado.
     private IndicadorCarga indicador(double asignadas, Integer maximas, int umbralPorcentaje) {
         if (maximas == null) {
             return IndicadorCarga.SIN_VINCULACION;
@@ -243,7 +242,6 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return IndicadorCarga.ADECUADO;
     }
 
-    // Horas de clase posibles en la ventana consultada: franja institucional de cada día, sin el almuerzo.
     private double horasDisponibles(ParametrosAcademicos parametros, DiaSemana diaFiltro, LocalTime desde, LocalTime hasta) {
         long minutos = 0;
         for (DiaSemana dia : DiaSemana.values()) {

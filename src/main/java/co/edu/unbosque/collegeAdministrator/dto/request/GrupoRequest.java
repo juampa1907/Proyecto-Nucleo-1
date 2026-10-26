@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-/**
- * @param cupoMaximo opcional: null para usar el máximo permitido por los parámetros.
- */
+
 public record GrupoRequest(
         @NotNull Integer idPeriodo,
         @NotNull Integer idMateria,

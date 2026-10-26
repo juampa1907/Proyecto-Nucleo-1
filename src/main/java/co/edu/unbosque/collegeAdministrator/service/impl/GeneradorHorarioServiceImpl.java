@@ -34,14 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Heurística greedy (ESP-NF-01):
- * 1. Programa primero los grupos más difíciles: más requisitos de aula, mayor cupo y menos docentes habilitados.
- * 2. Prefiere días sin sesiones del grupo y no consecutivos a los ya usados (HU-23).
- * 3. Usa el aula compatible más pequeña que alcance, para dejar libres las grandes.
- * 4. Cada intento se evalúa con GrupoService.evaluarSesion, que aplica las mismas reglas que la programación manual.
- * Si un grupo no se puede completar, informa el cuello de botella (entrevista con el Vicerrector).
- */
+
 @Service
 @Transactional
 public class GeneradorHorarioServiceImpl implements GeneradorHorarioServiceAPI {
@@ -111,7 +104,7 @@ public class GeneradorHorarioServiceImpl implements GeneradorHorarioServiceAPI {
         return new ResultadoGeneracion(programados, noProgramados);
     }
 
-    // Devuelve null si el grupo quedó completo, o el cuello de botella si no.
+
     private String programarGrupo(Grupo grupo, List<FranjaHoraria> franjas, ParametrosAcademicos parametros) {
         Materia materia = grupo.getMateria();
         int faltantes = sesionesFaltantes(grupo, parametros);

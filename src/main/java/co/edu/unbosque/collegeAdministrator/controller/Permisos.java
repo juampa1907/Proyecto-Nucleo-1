@@ -1,9 +1,6 @@
 package co.edu.unbosque.collegeAdministrator.controller;
 
-/**
- * Expresiones de @PreAuthorize por rol (HU-02). "Solo sus propios datos" (HU-53) se valida además en cada
- * endpoint con UsuarioActual.
- */
+
 public final class Permisos {
 
     public static final String AUTENTICADO = "isAuthenticated()";

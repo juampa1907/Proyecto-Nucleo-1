@@ -36,10 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalTime;
 import java.util.List;
 
-/**
- * Grupos y su programación (HU-14, HU-18, HU-19, HU-22 a HU-26, HU-30, HU-35, HU-36, HU-55).
- * La programación la hace el director de programa (o el administrador); la oferta la ve cualquier usuario.
- */
+
 @RestController
 @RequestMapping("/api/grupos")
 public class GrupoController {
@@ -59,9 +56,7 @@ public class GrupoController {
         this.usuarioActual = usuarioActual;
     }
 
-    /**
-     * HU-30: con idMateria devuelve la oferta (solo grupos abiertos) de esa materia; sin ella, todos los grupos del periodo.
-     */
+
     @GetMapping
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<GrupoResponse> listar(@RequestParam Integer idPeriodo, @RequestParam(required = false) Integer idMateria) {
@@ -104,7 +99,7 @@ public class GrupoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(aResponse(grupo));
     }
 
-    // HU-25: mover una sesión (arrastrar y soltar en el frontend).
+
     @PutMapping("/{id}/sesiones/{idSesion}")
     @PreAuthorize(Permisos.DIRECCION)
     public GrupoResponse moverSesion(@PathVariable Integer id, @PathVariable Integer idSesion,
@@ -119,9 +114,7 @@ public class GrupoController {
         return aResponse(grupoService.quitarSesion(id, idSesion));
     }
 
-    /**
-     * HU-23: advertencias de días consecutivos (no bloquean). La franja nueva es opcional; horas en formato HH:mm.
-     */
+
     @GetMapping("/{id}/advertencias")
     @PreAuthorize(Permisos.DIRECCION)
     public List<String> advertencias(@PathVariable Integer id,
@@ -146,14 +139,13 @@ public class GrupoController {
         return aResponse(grupoService.cerrarGrupo(id));
     }
 
-    // HU-36: mueve a los estudiantes del grupo cerrado {id} al grupo {idDestino}.
+
     @PostMapping("/{id}/reasignar/{idDestino}")
     @PreAuthorize(Permisos.DIRECCION)
     public ResultadoReasignacion reasignar(@PathVariable Integer id, @PathVariable Integer idDestino) {
         return inscripcionMateriaService.reasignarEstudiantes(id, idDestino);
     }
 
-    // HU-55: el docente asignado deja una observación sobre su asignación en borrador.
     @PostMapping("/{id}/observaciones")
     @PreAuthorize(Permisos.DOCENTE)
     public ResponseEntity<ObservacionResponse> registrarObservacion(@PathVariable Integer id,

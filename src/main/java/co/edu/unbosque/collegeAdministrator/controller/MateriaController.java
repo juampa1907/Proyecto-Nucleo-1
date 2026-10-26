@@ -22,9 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * HU-11, HU-13, HU-15: catálogo de materias, requisitos de aula, prerrequisitos y correquisitos.
- */
+
 @RestController
 @RequestMapping("/api/materias")
 public class MateriaController {
@@ -35,9 +33,7 @@ public class MateriaController {
         this.materiaService = materiaService;
     }
 
-    /**
-     * @param nombre opcional: filtra por nombre (contiene, sin distinguir mayúsculas).
-     */
+
     @GetMapping
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<MateriaResponse> listar(@RequestParam(required = false) String nombre) {

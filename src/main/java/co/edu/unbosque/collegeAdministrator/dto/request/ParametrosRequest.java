@@ -4,10 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalTime;
 
-/**
- * Las reglas de coherencia (rangos, mínimo ≤ máximo, etc.) las valida ParametrosAcademicosService.
- * minimoEstudiantesGrupo, creditosMinimos y creditosMaximos son opcionales: null desactiva esa regla.
- */
+
 public record ParametrosRequest(
         @NotNull Integer tamanoMaximoGrupo,
         @NotNull Integer toleranciaCupoPorcentaje,

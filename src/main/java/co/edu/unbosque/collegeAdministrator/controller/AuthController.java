@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Endpoints públicos (permitidos en SecurityConfig). HU-01 y HU-03.
- */
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -31,7 +29,7 @@ public class AuthController {
         return authService.login(request.username(), request.password(), peticion.getRemoteAddr());
     }
 
-    // Responde 204 exista o no el correo, para no revelar qué cuentas están registradas.
+
     @PostMapping("/recuperar-password")
     public ResponseEntity<Void> recuperarPassword(@Valid @RequestBody RecuperarPasswordRequest request) {
         authService.solicitarRecuperacion(request.correo());

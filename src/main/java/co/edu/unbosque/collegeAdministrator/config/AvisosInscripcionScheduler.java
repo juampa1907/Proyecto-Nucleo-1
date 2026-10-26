@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
-/**
- * HU-40: revisa una vez al día (app.avisos.cron) si hay que avisar la apertura o el cierre de inscripción.
- */
+
 @Component
 public class AvisosInscripcionScheduler {
 

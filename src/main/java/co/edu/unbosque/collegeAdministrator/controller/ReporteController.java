@@ -23,10 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalTime;
 import java.util.List;
 
-/**
- * Reportes (HU-42 a HU-44) y su exportación a PDF o Excel (HU-45). Cada "/exportar" aplica los mismos filtros
- * que la consulta, así el archivo conserva lo que el usuario ve en pantalla. Horas en formato HH:mm.
- */
+
 @RestController
 @RequestMapping("/api/reportes")
 public class ReporteController {

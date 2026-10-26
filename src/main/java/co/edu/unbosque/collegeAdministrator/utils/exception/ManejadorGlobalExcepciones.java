@@ -23,9 +23,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Convierte las excepciones en respuestas HTTP con el formato {@link RespuestaError}.
- */
 @RestControllerAdvice
 public class ManejadorGlobalExcepciones {
 
@@ -41,7 +38,6 @@ public class ManejadorGlobalExcepciones {
         return respuesta(HttpStatus.NOT_FOUND, "La ruta solicitada no existe", request, null);
     }
 
-    // Reglas de negocio y datos inválidos detectados por las entidades (por ejemplo, una franja con fin antes del inicio).
     @ExceptionHandler({ReglaNegocioException.class, IllegalArgumentException.class})
     public ResponseEntity<RespuestaError> reglaNegocio(RuntimeException e, HttpServletRequest request) {
         return respuesta(HttpStatus.BAD_REQUEST, e.getMessage(), request, null);
@@ -81,7 +77,6 @@ public class ManejadorGlobalExcepciones {
         return respuesta(HttpStatus.FORBIDDEN, e.getMessage(), request, null);
     }
 
-    // Lanzada por @PreAuthorize cuando el usuario no tiene el rol requerido.
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<RespuestaError> sinRol(AccessDeniedException e, HttpServletRequest request) {
         return respuesta(HttpStatus.FORBIDDEN, "No tienes permiso para realizar esta acción", request, null);
@@ -104,7 +99,6 @@ public class ManejadorGlobalExcepciones {
         return respuesta(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "El cuerpo debe enviarse como application/json", request, null);
     }
 
-    // El detalle técnico va al log; al cliente solo se le da un mensaje genérico.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RespuestaError> inesperado(Exception e, HttpServletRequest request) {
         LOG.error("Error inesperado en {}", request.getRequestURI(), e);

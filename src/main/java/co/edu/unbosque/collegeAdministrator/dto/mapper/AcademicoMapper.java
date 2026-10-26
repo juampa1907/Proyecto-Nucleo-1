@@ -21,9 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Materias, aulas, periodos y parámetros académicos.
- */
+
 public final class AcademicoMapper {
 
     private AcademicoMapper() {

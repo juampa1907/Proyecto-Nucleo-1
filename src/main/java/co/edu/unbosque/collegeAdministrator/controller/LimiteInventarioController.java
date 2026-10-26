@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * ESP-F-02 / ESP-F-04: topes de aulas por tipo y sede según el inventario de la Unidad de Espacios Físicos.
- */
+
 @RestController
 @RequestMapping("/api/limites-inventario")
 @PreAuthorize(Permisos.ADMIN)
