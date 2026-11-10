@@ -1,0 +1,10 @@
+FROM maven:3.9-eclipse-temurin-25 AS build
+WORKDIR /app
+COPY . .
+RUN mvn -B clean package -DskipTests
+
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+COPY --from=build /app/target/*.war app.war
+EXPOSE 8080
+ENTRYPOINT ["java", "-Xmx350m", "-XX:+UseSerialGC", "-jar", "app.war"]
