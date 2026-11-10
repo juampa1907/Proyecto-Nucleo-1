@@ -38,16 +38,33 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 
+/**
+ * Controlador REST de los estudiantes.
+ */
 @RestController
 @RequestMapping("/api/estudiantes")
 public class EstudianteController {
 
+    /** El servicio de gestión de estudiantes. */
     private final EstudianteServiceAPI estudianteService;
+    /** El servicio de inscripción de materias. */
     private final InscripcionMateriaServiceAPI inscripcionMateriaService;
+    /** El servicio de gestión de grupos y sesiones. */
     private final GrupoServiceAPI grupoService;
+    /** El servicio que genera los comprobantes de carga académica. */
     private final ComprobanteServiceAPI comprobanteService;
+    /** El componente que da acceso al usuario autenticado. */
     private final UsuarioActual usuarioActual;
 
+    /**
+     * Crea una instancia de {@code EstudianteController} con las dependencias requeridas.
+     *
+     * @param estudianteService el servicio de gestión de estudiantes
+     * @param inscripcionMateriaService el servicio de inscripción de materias
+     * @param grupoService el servicio de gestión de grupos y sesiones
+     * @param comprobanteService el servicio que genera los comprobantes de carga académica
+     * @param usuarioActual el componente que da acceso al usuario autenticado
+     */
     public EstudianteController(EstudianteServiceAPI estudianteService,
                                 InscripcionMateriaServiceAPI inscripcionMateriaService,
                                 GrupoServiceAPI grupoService,
@@ -60,6 +77,14 @@ public class EstudianteController {
         this.usuarioActual = usuarioActual;
     }
 
+    /**
+     * Crea un estudiante.
+     *
+     * <p>Endpoint: {@code POST /api/estudiantes}. Acceso: administrador.
+     *
+     * @param request los datos validados del estudiante
+     * @return la respuesta 201 con el estudiante creado
+     */
     @PostMapping
     @PreAuthorize(Permisos.ADMIN)
     public ResponseEntity<EstudianteResponse> crear(@Valid @RequestBody EstudianteRequest request) {
@@ -67,6 +92,15 @@ public class EstudianteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.aResponse(estudiante));
     }
 
+    /**
+     * Actualiza un estudiante.
+     *
+     * <p>Endpoint: {@code PUT /api/estudiantes/{id}}. Acceso: administrador.
+     *
+     * @param id el identificador del estudiante
+     * @param request los datos validados
+     * @return los datos actualizados
+     */
     @PutMapping("/{id}")
     @PreAuthorize(Permisos.ADMIN)
     public EstudianteResponse actualizar(@PathVariable Integer id, @Valid @RequestBody EstudianteActualizacionRequest request) {
@@ -76,12 +110,27 @@ public class EstudianteController {
         return UsuarioMapper.aResponse(estudianteService.guardar(estudiante));
     }
 
+    /**
+     * Lista los estudiantes.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes}. Acceso: director de programa o administrador.
+     *
+     * @return todos los estudiantes
+     */
     @GetMapping
     @PreAuthorize(Permisos.DIRECCION)
     public List<EstudianteResponse> listar() {
         return estudianteService.listar().stream().map(UsuarioMapper::aResponse).toList();
     }
 
+    /**
+     * Consulta un estudiante, si el solicitante tiene acceso.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes/{id}}. Acceso: cualquier usuario autenticado.
+     *
+     * @param id el identificador del estudiante
+     * @return los datos del estudiante
+     */
     @GetMapping("/{id}")
     @PreAuthorize(Permisos.AUTENTICADO)
     public EstudianteResponse buscar(@PathVariable Integer id) {
@@ -90,6 +139,15 @@ public class EstudianteController {
     }
 
 
+    /**
+     * Consulta las inscripciones del estudiante.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes/{id}/inscripciones}. Acceso: cualquier usuario autenticado.
+     *
+     * @param id el identificador del estudiante
+     * @param estado el estado por el que se filtra, o {@code null} para todas
+     * @return las inscripciones encontradas
+     */
     @GetMapping("/{id}/inscripciones")
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<InscripcionResponse> inscripciones(@PathVariable Integer id,
@@ -101,6 +159,15 @@ public class EstudianteController {
         return inscripciones.stream().map(InscripcionMapper::aResponse).toList();
     }
 
+    /**
+     * Consulta las materias en curso del estudiante.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes/{id}/materias-actuales}. Acceso: cualquier usuario
+     * autenticado.
+     *
+     * @param id el identificador del estudiante
+     * @return las materias en curso
+     */
     @GetMapping("/{id}/materias-actuales")
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<MateriaResumen> materiasActuales(@PathVariable Integer id) {
@@ -109,6 +176,15 @@ public class EstudianteController {
     }
 
 
+    /**
+     * Consulta el horario del estudiante en un periodo.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes/{id}/horario}. Acceso: cualquier usuario autenticado.
+     *
+     * @param id el identificador del estudiante
+     * @param idPeriodo el identificador del periodo académico
+     * @return los grupos de su carga académica
+     */
     @GetMapping("/{id}/horario")
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<GrupoResponse> horario(@PathVariable Integer id, @RequestParam Integer idPeriodo) {
@@ -120,6 +196,15 @@ public class EstudianteController {
     }
 
 
+    /**
+     * Descarga el comprobante de carga académica del estudiante.
+     *
+     * <p>Endpoint: {@code GET /api/estudiantes/{id}/comprobante}. Acceso: cualquier usuario autenticado.
+     *
+     * @param id el identificador del estudiante
+     * @param idPeriodo el identificador del periodo académico
+     * @return la respuesta con el archivo PDF
+     */
     @GetMapping("/{id}/comprobante")
     @PreAuthorize(Permisos.AUTENTICADO)
     public ResponseEntity<byte[]> comprobante(@PathVariable Integer id, @RequestParam Integer idPeriodo) {
@@ -132,6 +217,11 @@ public class EstudianteController {
                 .body(pdf);
     }
 
+    /**
+     * Permite el acceso al propio estudiante, a administradores y directores.
+     *
+     * @param idEstudiante el identificador del estudiante consultado
+     */
     private void verificarAcceso(Integer idEstudiante) {
         usuarioActual.verificarPropietarioOAlgunRol(idEstudiante, Rol.ADMINISTRADOR, Rol.DIRECTOR_PROGRAMA);
     }

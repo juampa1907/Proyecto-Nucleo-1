@@ -15,15 +15,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Implementación de las operaciones sobre el presupuesto por vinculación.
+ */
 @Service
 @Transactional
 public class PresupuestoVinculacionServiceImpl extends GenericServiceImpl<PresupuestoVinculacion, Integer>
         implements PresupuestoVinculacionServiceAPI {
 
+    /** El repositorio de presupuestos por vinculación. */
     private final PresupuestoVinculacionRepository presupuestoVinculacionRepository;
+    /** El servicio de gestión de periodos académicos. */
     private final PeriodoAcademicoServiceAPI periodoAcademicoService;
+    /** El servicio de tipos de vinculación docente. */
     private final TipoVinculacionServiceAPI tipoVinculacionService;
 
+    /**
+     * Crea una instancia de {@code PresupuestoVinculacionServiceImpl} con las dependencias requeridas.
+     *
+     * @param presupuestoVinculacionRepository el repositorio de presupuestos por vinculación
+     * @param periodoAcademicoService el servicio de gestión de periodos académicos
+     * @param tipoVinculacionService el servicio de tipos de vinculación docente
+     */
     public PresupuestoVinculacionServiceImpl(PresupuestoVinculacionRepository presupuestoVinculacionRepository,
                                              PeriodoAcademicoServiceAPI periodoAcademicoService,
                                              TipoVinculacionServiceAPI tipoVinculacionService) {
@@ -32,11 +45,17 @@ public class PresupuestoVinculacionServiceImpl extends GenericServiceImpl<Presup
         this.tipoVinculacionService = tipoVinculacionService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<PresupuestoVinculacion, Integer> getRepository() {
         return presupuestoVinculacionRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PresupuestoVinculacion registrar(Integer idPeriodo, Integer idTipoVinculacion, Integer horasPresupuestadas) {
         if (horasPresupuestadas == null || horasPresupuestadas < 0) {
@@ -54,6 +73,9 @@ public class PresupuestoVinculacionServiceImpl extends GenericServiceImpl<Presup
         return presupuestoVinculacionRepository.save(presupuesto);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<PresupuestoVinculacion> listarPorPeriodo(Integer idPeriodo) {

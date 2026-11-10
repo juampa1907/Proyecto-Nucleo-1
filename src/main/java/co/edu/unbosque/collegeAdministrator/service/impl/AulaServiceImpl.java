@@ -18,23 +18,43 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Implementación de las operaciones de negocio sobre las aulas.
+ */
 @Service
 @Transactional
 public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implements AulaServiceAPI {
 
+    /** El repositorio de persistencia de aulas. */
     private final AulaRepository aulaRepository;
+    /** El repositorio de los topes de inventario de aulas. */
     private final LimiteInventarioAulaRepository limiteInventarioAulaRepository;
 
+    /**
+     * Crea una instancia de {@code AulaServiceImpl} con las dependencias requeridas.
+     *
+     * @param aulaRepository el repositorio de persistencia de aulas
+     * @param limiteInventarioAulaRepository el repositorio de los topes de inventario de aulas
+     */
     public AulaServiceImpl(AulaRepository aulaRepository, LimiteInventarioAulaRepository limiteInventarioAulaRepository) {
         this.aulaRepository = aulaRepository;
         this.limiteInventarioAulaRepository = limiteInventarioAulaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<Aula, Integer> getRepository() {
         return aulaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Exige capacidad positiva y bloque, restringe las aulas de cómputo a Usaquén y, al crear, valida el
+     * tope de inventario.
+     */
     @Override
     public Aula guardar(Aula aula) {
         if (aula.getCapacidad() == null || aula.getCapacidad() <= 0) {
@@ -55,6 +75,12 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         return super.guardar(aula);
     }
 
+    /**
+     * Verifica que un aula nueva no supere el tope de su tipo de espacio y sede.
+     *
+     * @param aula el aula evaluada
+     * @throws ReglaNegocioException si se alcanzó el tope
+     */
     private void validarTopeInventario(Aula aula) {
         Sede sede = aula.getBloque().getSede();
         limiteInventarioAulaRepository.findByTipoEspacioAndSede(aula.getTipoEspacio(), sede).ifPresent(limite -> {
@@ -66,30 +92,48 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         });
     }
 
+    /**
+     * Obtiene los bloques de una sede.
+     *
+     * @param sede la sede, o {@code null} para todas
+     * @return los bloques correspondientes
+     */
     private List<Bloque> bloquesDe(Sede sede) {
         return Arrays.stream(Bloque.values())
                 .filter(bloque -> sede == null || bloque.getSede() == sede)
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Aula> listarPorBloqueYTipo(Bloque bloque, TipoEspacio tipoEspacio) {
         return aulaRepository.findByBloqueAndTipoEspacioAndActivaTrue(bloque, tipoEspacio);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Aula> listarActivas() {
         return aulaRepository.findByActivaTrue();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Aula> listarPorBloque(Bloque bloque) {
         return aulaRepository.findByBloqueAndActivaTrue(bloque);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Aula desactivar(Integer idAula) {
         Aula aula = buscarPorId(idAula);
@@ -97,6 +141,9 @@ public class AulaServiceImpl extends GenericServiceImpl<Aula, Integer> implement
         return aula;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Aula> sugerirAulas(Integer capacidadMinima, Set<CaracteristicaAula> requisitos, Sede sede) {

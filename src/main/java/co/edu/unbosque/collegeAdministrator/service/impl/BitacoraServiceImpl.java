@@ -11,20 +11,37 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Implementación de la bitácora de auditoría.
+ */
 @Service
 @Transactional
 public class BitacoraServiceImpl implements BitacoraServiceAPI {
 
+    /** Longitud máxima del detalle de un registro. */
     private static final int LONGITUD_MAXIMA_DETALLE = 1000;
 
+    /** El repositorio de los registros de bitácora. */
     private final RegistroBitacoraRepository registroBitacoraRepository;
+    /** El componente que da acceso al usuario autenticado. */
     private final UsuarioActual usuarioActual;
 
+    /**
+     * Crea una instancia de {@code BitacoraServiceImpl} con las dependencias requeridas.
+     *
+     * @param registroBitacoraRepository el repositorio de los registros de bitácora
+     * @param usuarioActual el componente que da acceso al usuario autenticado
+     */
     public BitacoraServiceImpl(RegistroBitacoraRepository registroBitacoraRepository, UsuarioActual usuarioActual) {
         this.registroBitacoraRepository = registroBitacoraRepository;
         this.usuarioActual = usuarioActual;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Recorta el detalle que supere la longitud máxima.
+     */
     @Override
     public void registrar(String accion, String detalle) {
         String detalleRecortado = detalle != null && detalle.length() > LONGITUD_MAXIMA_DETALLE
@@ -33,6 +50,9 @@ public class BitacoraServiceImpl implements BitacoraServiceAPI {
         registroBitacoraRepository.save(new RegistroBitacora(usuarioActual.obtenerUsername(), accion, detalleRecortado));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<RegistroBitacora> listar(LocalDateTime desde, LocalDateTime hasta, String username) {

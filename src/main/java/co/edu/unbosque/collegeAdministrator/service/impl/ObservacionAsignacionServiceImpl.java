@@ -14,25 +14,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Implementación de las operaciones sobre las observaciones de asignación.
+ */
 @Service
 @Transactional
 public class ObservacionAsignacionServiceImpl extends GenericServiceImpl<ObservacionAsignacion, Integer>
         implements ObservacionAsignacionServiceAPI {
 
+    /** El repositorio de observaciones de asignación. */
     private final ObservacionAsignacionRepository observacionAsignacionRepository;
+    /** El servicio de gestión de grupos y sesiones. */
     private final GrupoServiceAPI grupoService;
 
+    /**
+     * Crea una instancia de {@code ObservacionAsignacionServiceImpl} con las dependencias requeridas.
+     *
+     * @param observacionAsignacionRepository el repositorio de observaciones de asignación
+     * @param grupoService el servicio de gestión de grupos y sesiones
+     */
     public ObservacionAsignacionServiceImpl(ObservacionAsignacionRepository observacionAsignacionRepository,
                                             GrupoServiceAPI grupoService) {
         this.observacionAsignacionRepository = observacionAsignacionRepository;
         this.grupoService = grupoService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<ObservacionAsignacion, Integer> getRepository() {
         return observacionAsignacionRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ObservacionAsignacion registrar(Integer idGrupo, Integer idDocente, String texto) {
         if (texto == null || texto.isBlank()) {
@@ -48,6 +65,9 @@ public class ObservacionAsignacionServiceImpl extends GenericServiceImpl<Observa
         return observacionAsignacionRepository.save(new ObservacionAsignacion(grupo, grupo.getDocente(), texto));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ObservacionAsignacion resolver(Integer idObservacion) {
         ObservacionAsignacion observacion = buscarPorId(idObservacion);
@@ -55,6 +75,9 @@ public class ObservacionAsignacionServiceImpl extends GenericServiceImpl<Observa
         return observacion;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ObservacionAsignacion> listarPendientes(Integer idPeriodo) {

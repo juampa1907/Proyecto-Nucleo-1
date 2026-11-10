@@ -36,18 +36,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+/**
+ * Implementación de la generación de comprobantes de carga académica.
+ */
 @Service
 @Transactional
 public class ComprobanteServiceImpl implements ComprobanteServiceAPI {
 
+    /** Formato de la fecha de generación del comprobante. */
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    /** Encabezados de la tabla del comprobante. */
     private static final List<String> COLUMNAS = List.of("Código", "Materia", "Grupo", "Créditos", "Docente", "Horario", "Estado");
 
+    /** El servicio de gestión de estudiantes. */
     private final EstudianteServiceAPI estudianteService;
+    /** El servicio de gestión de periodos académicos. */
     private final PeriodoAcademicoServiceAPI periodoAcademicoService;
+    /** El servicio de inscripción de materias. */
     private final InscripcionMateriaServiceAPI inscripcionMateriaService;
+    /** El repositorio de matrículas por periodo. */
     private final MatriculaPeriodoRepository matriculaPeriodoRepository;
 
+    /**
+     * Crea una instancia de {@code ComprobanteServiceImpl} con las dependencias requeridas.
+     *
+     * @param estudianteService el servicio de gestión de estudiantes
+     * @param periodoAcademicoService el servicio de gestión de periodos académicos
+     * @param inscripcionMateriaService el servicio de inscripción de materias
+     * @param matriculaPeriodoRepository el repositorio de matrículas por periodo
+     */
     public ComprobanteServiceImpl(EstudianteServiceAPI estudianteService,
                                   PeriodoAcademicoServiceAPI periodoAcademicoService,
                                   InscripcionMateriaServiceAPI inscripcionMateriaService,
@@ -58,6 +75,11 @@ public class ComprobanteServiceImpl implements ComprobanteServiceAPI {
         this.matriculaPeriodoRepository = matriculaPeriodoRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>El código de verificación es el SHA-256 del contenido del comprobante.
+     */
     @Override
     public byte[] generarComprobante(Integer idEstudiante, Integer idPeriodo) {
         Estudiante estudiante = estudianteService.buscarPorId(idEstudiante);
@@ -92,6 +114,17 @@ public class ComprobanteServiceImpl implements ComprobanteServiceAPI {
         return construirPdf(estudiante, periodo, fecha, filas, totalCreditos, codigoVerificacion);
     }
 
+    /**
+     * Construye el documento PDF del comprobante.
+     *
+     * @param estudiante el estudiante
+     * @param periodo el periodo
+     * @param fecha la fecha de generación
+     * @param filas las filas de la tabla de materias
+     * @param totalCreditos el total de créditos
+     * @param codigoVerificacion el código de verificación
+     * @return el contenido del archivo PDF
+     */
     private byte[] construirPdf(Estudiante estudiante, PeriodoAcademico periodo, String fecha, List<List<String>> filas,
                                 int totalCreditos, String codigoVerificacion) {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
@@ -128,16 +161,35 @@ public class ComprobanteServiceImpl implements ComprobanteServiceAPI {
         return salida.toByteArray();
     }
 
+    /**
+     * Describe las sesiones de un grupo.
+     *
+     * @param grupo el grupo
+     * @return las sesiones separadas por punto y coma
+     */
     private String describirHorario(Grupo grupo) {
         return grupo.getSesiones().stream()
                 .map(this::describirSesion)
                 .collect(Collectors.joining("; "));
     }
 
+    /**
+     * Describe una sesión con su franja y su aula.
+     *
+     * @param sesion la sesión
+     * @return la descripción de la sesión
+     */
     private String describirSesion(DetalleHorario sesion) {
         return sesion.getFranja() + (sesion.getAula() == null ? "" : " (" + sesion.getAula().getCodigo() + ")");
     }
 
+    /**
+     * Calcula el resumen SHA-256 de un texto.
+     *
+     * @param contenido el texto
+     * @return el resumen en hexadecimal
+     * @throws IllegalStateException si la JVM no dispone de SHA-256
+     */
     private String calcularSha256(String contenido) {
         try {
             byte[] hash = MessageDigest.getInstance("SHA-256").digest(contenido.getBytes(StandardCharsets.UTF_8));

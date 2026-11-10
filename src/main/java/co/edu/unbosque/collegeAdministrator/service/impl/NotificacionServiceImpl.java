@@ -17,17 +17,33 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Implementación de las notificaciones, guardadas en base de datos y enviadas opcionalmente por correo.
+ */
 @Service
 @Transactional
 public class NotificacionServiceImpl implements NotificacionServiceAPI {
 
+    /** El registrador de eventos de la clase. */
     private static final Logger LOG = LoggerFactory.getLogger(NotificacionServiceImpl.class);
 
+    /** El repositorio de notificaciones. */
     private final NotificacionRepository notificacionRepository;
+    /** El proveedor del componente de envío de correo, que puede no estar configurado. */
     private final ObjectProvider<JavaMailSender> mailSender;
+    /** Indica si el envío de correos está habilitado. */
     private final boolean correoHabilitado;
+    /** La dirección remitente de los correos. */
     private final String remitente;
 
+    /**
+     * Crea una instancia de {@code NotificacionServiceImpl} con las dependencias requeridas.
+     *
+     * @param notificacionRepository el repositorio de notificaciones
+     * @param mailSender el proveedor del componente de envío de correo, que puede no estar configurado
+     * @param correoHabilitado {@code true} si el envío de correos está habilitado
+     * @param remitente la dirección remitente de los correos
+     */
     public NotificacionServiceImpl(NotificacionRepository notificacionRepository,
                                    ObjectProvider<JavaMailSender> mailSender,
                                    @Value("${app.notificaciones.correo-habilitado:false}") boolean correoHabilitado,
@@ -38,6 +54,9 @@ public class NotificacionServiceImpl implements NotificacionServiceAPI {
         this.remitente = remitente;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Notificacion notificar(Usuario usuario, String asunto, String mensaje) {
         Notificacion notificacion = new Notificacion(usuario, asunto, mensaje);
@@ -45,17 +64,26 @@ public class NotificacionServiceImpl implements NotificacionServiceAPI {
         return notificacionRepository.save(notificacion);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void enviarSoloCorreo(Usuario usuario, String asunto, String mensaje) {
         enviarCorreo(usuario.getCorreo(), asunto, mensaje);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Notificacion> listarPorUsuario(Integer idUsuario) {
         return notificacionRepository.findByUsuario_IdUsuarioOrderByFechaDesc(idUsuario);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Notificacion marcarLeida(Integer idNotificacion, Integer idUsuario) {
         Notificacion notificacion = notificacionRepository.findById(idNotificacion)
@@ -65,6 +93,14 @@ public class NotificacionServiceImpl implements NotificacionServiceAPI {
         return notificacion;
     }
 
+    /**
+     * Intenta enviar un correo; los fallos solo se registran en el log.
+     *
+     * @param destinatario la dirección de destino
+     * @param asunto el asunto del correo
+     * @param mensaje el contenido del correo
+     * @return {@code true} si el correo se envió
+     */
     private boolean enviarCorreo(String destinatario, String asunto, String mensaje) {
         if (!correoHabilitado) {
             return false;

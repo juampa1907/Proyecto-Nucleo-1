@@ -26,20 +26,44 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Implementación de la autenticación y la recuperación de contraseña.
+ */
 @Service
 public class AuthServiceImpl implements AuthServiceAPI {
 
+    /** Mensaje genérico para credenciales incorrectas. */
     private static final String CREDENCIALES_INVALIDAS = "Usuario o contraseña incorrectos";
 
+    /** El componente de Spring Security que valida las credenciales. */
     private final AuthenticationManager authenticationManager;
+    /** El servicio que genera y lee los tokens JWT. */
     private final JwtService jwtService;
+    /** El servicio de gestión de usuarios. */
     private final UsuarioServiceAPI usuarioService;
+    /** El repositorio de persistencia de usuarios. */
     private final UsuarioRepository usuarioRepository;
+    /** El repositorio de tokens de recuperación de contraseña. */
     private final TokenRecuperacionRepository tokenRecuperacionRepository;
+    /** El codificador usado para cifrar y comparar contraseñas. */
     private final PasswordEncoder passwordEncoder;
+    /** El servicio de notificaciones a usuarios. */
     private final NotificacionServiceAPI notificacionService;
+    /** La URL base de la aplicación web cliente. */
     private final String urlFrontend;
 
+    /**
+     * Crea una instancia de {@code AuthServiceImpl} con las dependencias requeridas.
+     *
+     * @param authenticationManager el componente de Spring Security que valida las credenciales
+     * @param jwtService el servicio que genera y lee los tokens JWT
+     * @param usuarioService el servicio de gestión de usuarios
+     * @param usuarioRepository el repositorio de persistencia de usuarios
+     * @param tokenRecuperacionRepository el repositorio de tokens de recuperación de contraseña
+     * @param passwordEncoder el codificador usado para cifrar y comparar contraseñas
+     * @param notificacionService el servicio de notificaciones a usuarios
+     * @param urlFrontend la URL base de la aplicación web cliente
+     */
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            JwtService jwtService,
                            UsuarioServiceAPI usuarioService,
@@ -58,6 +82,12 @@ public class AuthServiceImpl implements AuthServiceAPI {
         this.urlFrontend = urlFrontend;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Las excepciones de autenticación no revierten la transacción, para conservar el registro de intentos
+     * fallidos.
+     */
     @Override
     @Transactional(noRollbackFor = AutenticacionException.class)
     public RespuestaLogin login(String username, String password, String ip) {
@@ -86,6 +116,11 @@ public class AuthServiceImpl implements AuthServiceAPI {
         return new RespuestaLogin(jwtService.generarToken(detalles), username, roles);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>El enlace solo se envía por correo; la notificación guardada no lo incluye para no exponerlo.
+     */
     @Override
     @Transactional
     public void solicitarRecuperacion(String correo) {
@@ -103,6 +138,9 @@ public class AuthServiceImpl implements AuthServiceAPI {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void restablecerPassword(String token, String passwordNueva) {

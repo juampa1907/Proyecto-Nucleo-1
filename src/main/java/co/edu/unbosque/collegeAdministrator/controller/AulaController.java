@@ -27,17 +27,35 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * Controlador REST de las aulas.
+ */
 @RestController
 @RequestMapping("/api/aulas")
 public class AulaController {
 
+    /** El servicio de gestión de aulas. */
     private final AulaServiceAPI aulaService;
 
+    /**
+     * Crea una instancia de {@code AulaController} con las dependencias requeridas.
+     *
+     * @param aulaService el servicio de gestión de aulas
+     */
     public AulaController(AulaServiceAPI aulaService) {
         this.aulaService = aulaService;
     }
 
 
+    /**
+     * Lista las aulas activas, con filtros opcionales.
+     *
+     * <p>Endpoint: {@code GET /api/aulas}. Acceso: cualquier usuario autenticado.
+     *
+     * @param bloque el bloque por el que se filtra, o {@code null}
+     * @param tipo el tipo de espacio por el que se filtra, o {@code null}
+     * @return las aulas que cumplen los filtros
+     */
     @GetMapping
     @PreAuthorize(Permisos.AUTENTICADO)
     public List<AulaResponse> listar(@RequestParam(required = false) Bloque bloque,
@@ -55,12 +73,28 @@ public class AulaController {
         return aulas.stream().map(AcademicoMapper::aResponse).toList();
     }
 
+    /**
+     * Consulta un aula.
+     *
+     * <p>Endpoint: {@code GET /api/aulas/{id}}. Acceso: cualquier usuario autenticado.
+     *
+     * @param id el identificador del aula
+     * @return los datos del aula
+     */
     @GetMapping("/{id}")
     @PreAuthorize(Permisos.AUTENTICADO)
     public AulaResponse buscar(@PathVariable Integer id) {
         return AcademicoMapper.aResponse(aulaService.buscarPorId(id));
     }
 
+    /**
+     * Crea un aula.
+     *
+     * <p>Endpoint: {@code POST /api/aulas}. Acceso: administrador.
+     *
+     * @param request los datos validados del aula
+     * @return la respuesta 201 con el aula creada
+     */
     @PostMapping
     @PreAuthorize(Permisos.ADMIN)
     public ResponseEntity<AulaResponse> crear(@Valid @RequestBody AulaRequest request) {
@@ -68,6 +102,15 @@ public class AulaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(AcademicoMapper.aResponse(aula));
     }
 
+    /**
+     * Actualiza un aula.
+     *
+     * <p>Endpoint: {@code PUT /api/aulas/{id}}. Acceso: administrador.
+     *
+     * @param id el identificador del aula
+     * @param request los datos validados del aula
+     * @return los datos actualizados
+     */
     @PutMapping("/{id}")
     @PreAuthorize(Permisos.ADMIN)
     public AulaResponse actualizar(@PathVariable Integer id, @Valid @RequestBody AulaRequest request) {
@@ -76,6 +119,14 @@ public class AulaController {
         return AcademicoMapper.aResponse(aulaService.guardar(aula));
     }
 
+    /**
+     * Desactiva un aula.
+     *
+     * <p>Endpoint: {@code PATCH /api/aulas/{id}/desactivar}. Acceso: administrador.
+     *
+     * @param id el identificador del aula
+     * @return los datos actualizados
+     */
     @PatchMapping("/{id}/desactivar")
     @PreAuthorize(Permisos.ADMIN)
     public AulaResponse desactivar(@PathVariable Integer id) {
@@ -83,6 +134,16 @@ public class AulaController {
     }
 
 
+    /**
+     * Sugiere aulas según su capacidad y características.
+     *
+     * <p>Endpoint: {@code GET /api/aulas/sugerencias}. Acceso: director de programa o administrador.
+     *
+     * @param capacidad la capacidad mínima
+     * @param caracteristicas las características exigidas, o {@code null}
+     * @param sede la sede de búsqueda, o {@code null}
+     * @return las aulas candidatas
+     */
     @GetMapping("/sugerencias")
     @PreAuthorize(Permisos.DIRECCION)
     public List<AulaResponse> sugerencias(@RequestParam Integer capacidad,

@@ -12,12 +12,25 @@ import co.edu.unbosque.collegeAdministrator.entity.VersionHorario;
 
 import java.util.Comparator;
 
+/**
+ * Conversiones de las entidades de programación horaria a sus objetos de respuesta.
+ */
 public final class HorarioMapper {
 
+    /**
+     * Constructor privado: esta clase no debe instanciarse.
+     */
     private HorarioMapper() {
     }
 
 
+    /**
+     * Convierte un grupo en su respuesta, con las sesiones ordenadas por día y hora.
+     *
+     * @param grupo el grupo
+     * @param cuposDisponibles los cupos disponibles del grupo
+     * @return la respuesta correspondiente
+     */
     public static GrupoResponse aResponse(Grupo grupo, long cuposDisponibles) {
         return new GrupoResponse(grupo.getIdGrupo(), grupo.getCodigo(), AcademicoMapper.aResumen(grupo.getMateria()),
                 grupo.getPeriodo().getIdPeriodo(), grupo.getPeriodo().getCodigo(),
@@ -31,6 +44,12 @@ public final class HorarioMapper {
                         .toList());
     }
 
+    /**
+     * Convierte una sesión en su respuesta.
+     *
+     * @param sesion la sesión
+     * @return la respuesta correspondiente
+     */
     public static SesionResponse aResponse(DetalleHorario sesion) {
         Aula aula = sesion.getAula();
         return new SesionResponse(sesion.getIdDetalleHorario(), sesion.getFranja().getDiaSemana(),
@@ -39,6 +58,12 @@ public final class HorarioMapper {
                 aula == null ? null : aula.getBloque(), sesion.isUsoExcepcional());
     }
 
+    /**
+     * Convierte una observación en su respuesta.
+     *
+     * @param observacion la observación
+     * @return la respuesta correspondiente
+     */
     public static ObservacionResponse aResponse(ObservacionAsignacion observacion) {
         Grupo grupo = observacion.getGrupo();
         return new ObservacionResponse(observacion.getIdObservacion(), grupo.getIdGrupo(),
@@ -47,6 +72,12 @@ public final class HorarioMapper {
                 observacion.getTexto(), observacion.getFecha(), observacion.getEstado());
     }
 
+    /**
+     * Convierte una versión del horario en su respuesta.
+     *
+     * @param version la versión
+     * @return la respuesta correspondiente
+     */
     public static VersionHorarioResponse aResponse(VersionHorario version) {
         return new VersionHorarioResponse(version.getIdVersion(), version.getNumero(), version.getFecha(),
                 version.getUsuario(), version.getDescripcion());

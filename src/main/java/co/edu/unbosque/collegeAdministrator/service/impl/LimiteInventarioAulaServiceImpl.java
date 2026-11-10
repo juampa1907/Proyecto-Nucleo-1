@@ -12,25 +12,42 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Implementación de las operaciones sobre los topes de inventario de aulas.
+ */
 @Service
 @Transactional
 public class LimiteInventarioAulaServiceImpl extends GenericServiceImpl<LimiteInventarioAula, Integer>
         implements LimiteInventarioAulaServiceAPI {
 
+    /** El repositorio de los topes de inventario de aulas. */
     private final LimiteInventarioAulaRepository limiteInventarioAulaRepository;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
 
+    /**
+     * Crea una instancia de {@code LimiteInventarioAulaServiceImpl} con las dependencias requeridas.
+     *
+     * @param limiteInventarioAulaRepository el repositorio de los topes de inventario de aulas
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     */
     public LimiteInventarioAulaServiceImpl(LimiteInventarioAulaRepository limiteInventarioAulaRepository,
                                            BitacoraServiceAPI bitacoraService) {
         this.limiteInventarioAulaRepository = limiteInventarioAulaRepository;
         this.bitacoraService = bitacoraService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<LimiteInventarioAula, Integer> getRepository() {
         return limiteInventarioAulaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LimiteInventarioAula definirLimite(TipoEspacio tipoEspacio, Sede sede, Integer maximo) {
         if (tipoEspacio == null || sede == null) {

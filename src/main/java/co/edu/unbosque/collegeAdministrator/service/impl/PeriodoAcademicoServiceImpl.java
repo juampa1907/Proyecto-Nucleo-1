@@ -28,19 +28,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación de las operaciones sobre los periodos académicos.
+ */
 @Service
 @Transactional
 public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcademico, Integer>
         implements PeriodoAcademicoServiceAPI {
 
+    /** El repositorio de periodos académicos. */
     private final PeriodoAcademicoRepository periodoAcademicoRepository;
+    /** El repositorio de persistencia de grupos. */
     private final GrupoRepository grupoRepository;
+    /** El repositorio de observaciones de asignación. */
     private final ObservacionAsignacionRepository observacionAsignacionRepository;
+    /** El repositorio de persistencia de estudiantes. */
     private final EstudianteRepository estudianteRepository;
+    /** El servicio de parámetros académicos institucionales. */
     private final ParametrosAcademicosServiceAPI parametrosAcademicosService;
+    /** El servicio de notificaciones a usuarios. */
     private final NotificacionServiceAPI notificacionService;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
 
+    /**
+     * Crea una instancia de {@code PeriodoAcademicoServiceImpl} con las dependencias requeridas.
+     *
+     * @param periodoAcademicoRepository el repositorio de periodos académicos
+     * @param grupoRepository el repositorio de persistencia de grupos
+     * @param observacionAsignacionRepository el repositorio de observaciones de asignación
+     * @param estudianteRepository el repositorio de persistencia de estudiantes
+     * @param parametrosAcademicosService el servicio de parámetros académicos institucionales
+     * @param notificacionService el servicio de notificaciones a usuarios
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     */
     public PeriodoAcademicoServiceImpl(PeriodoAcademicoRepository periodoAcademicoRepository,
                                        GrupoRepository grupoRepository,
                                        ObservacionAsignacionRepository observacionAsignacionRepository,
@@ -57,11 +78,19 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         this.bitacoraService = bitacoraService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<PeriodoAcademico, Integer> getRepository() {
         return periodoAcademicoRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Valida las fechas, impide códigos repetidos al crear y no permite modificar periodos cerrados.
+     */
     @Override
     public PeriodoAcademico guardar(PeriodoAcademico periodo) {
         if (periodo.getFechaInicio() == null || periodo.getFechaFin() == null
@@ -84,6 +113,9 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         return super.guardar(periodo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PeriodoAcademico cerrar(Integer idPeriodo) {
         PeriodoAcademico periodo = buscarPorId(idPeriodo);
@@ -92,6 +124,9 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         return periodo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PeriodoAcademico publicarHorario(Integer idPeriodo) {
         PeriodoAcademico periodo = buscarPorId(idPeriodo);
@@ -128,6 +163,9 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         return periodo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void enviarAvisosInscripcion(LocalDate hoy) {
         int dias = parametrosAcademicosService.obtener().getDiasAnticipacionAviso();
@@ -150,14 +188,34 @@ public class PeriodoAcademicoServiceImpl extends GenericServiceImpl<PeriodoAcade
         }
     }
 
+    /**
+     * Indica si una fecha objetivo está dentro de la ventana de aviso.
+     *
+     * @param hoy la fecha de referencia
+     * @param fecha la fecha objetivo
+     * @param diasAnticipacion los días de anticipación
+     * @return {@code true} si corresponde avisar
+     */
     private boolean dentroDelAviso(LocalDate hoy, LocalDate fecha, int diasAnticipacion) {
         return !hoy.isBefore(fecha.minusDays(diasAnticipacion)) && !hoy.isAfter(fecha);
     }
 
+    /**
+     * Envía una notificación a todos los estudiantes.
+     *
+     * @param asunto el asunto
+     * @param mensaje el contenido de la notificación
+     */
     private void avisarEstudiantes(String asunto, String mensaje) {
         estudianteRepository.findAll().forEach(estudiante -> notificacionService.notificar(estudiante, asunto, mensaje));
     }
 
+    /**
+     * Envía a cada docente el detalle de sus clases publicadas.
+     *
+     * @param periodo el periodo publicado
+     * @param grupos los grupos publicados
+     */
     private void notificarHorarioADocentes(PeriodoAcademico periodo, List<Grupo> grupos) {
         Map<Docente, List<Grupo>> gruposPorDocente = grupos.stream()
                 .collect(Collectors.groupingBy(Grupo::getDocente, LinkedHashMap::new, Collectors.toList()));

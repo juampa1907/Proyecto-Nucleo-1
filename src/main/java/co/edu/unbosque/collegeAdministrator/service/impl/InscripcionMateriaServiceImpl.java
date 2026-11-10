@@ -36,24 +36,50 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación de la inscripción de materias y la matrícula de estudiantes.
+ */
 @Service
 @Transactional
 public class InscripcionMateriaServiceImpl extends GenericServiceImpl<InscripcionMateria, Integer>
         implements InscripcionMateriaServiceAPI {
 
+    /** Nota mínima permitida. */
     static final BigDecimal NOTA_MINIMA = new BigDecimal("0.0");
+    /** Nota máxima permitida. */
     static final BigDecimal NOTA_MAXIMA = new BigDecimal("5.0");
+    /** Nota mínima para aprobar una materia. */
     static final BigDecimal NOTA_APROBACION = new BigDecimal("3.0");
 
+    /** El repositorio de inscripciones de materias. */
     private final InscripcionMateriaRepository inscripcionMateriaRepository;
+    /** El repositorio de matrículas por periodo. */
     private final MatriculaPeriodoRepository matriculaPeriodoRepository;
+    /** El servicio de gestión de estudiantes. */
     private final EstudianteServiceAPI estudianteService;
+    /** El servicio de gestión de grupos y sesiones. */
     private final GrupoServiceAPI grupoService;
+    /** El servicio de gestión de periodos académicos. */
     private final PeriodoAcademicoServiceAPI periodoAcademicoService;
+    /** El servicio de parámetros académicos institucionales. */
     private final ParametrosAcademicosServiceAPI parametrosAcademicosService;
+    /** El servicio de notificaciones a usuarios. */
     private final NotificacionServiceAPI notificacionService;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
 
+    /**
+     * Crea una instancia de {@code InscripcionMateriaServiceImpl} con las dependencias requeridas.
+     *
+     * @param inscripcionMateriaRepository el repositorio de inscripciones de materias
+     * @param matriculaPeriodoRepository el repositorio de matrículas por periodo
+     * @param estudianteService el servicio de gestión de estudiantes
+     * @param grupoService el servicio de gestión de grupos y sesiones
+     * @param periodoAcademicoService el servicio de gestión de periodos académicos
+     * @param parametrosAcademicosService el servicio de parámetros académicos institucionales
+     * @param notificacionService el servicio de notificaciones a usuarios
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     */
     public InscripcionMateriaServiceImpl(InscripcionMateriaRepository inscripcionMateriaRepository,
                                          MatriculaPeriodoRepository matriculaPeriodoRepository,
                                          EstudianteServiceAPI estudianteService,
@@ -72,11 +98,17 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         this.bitacoraService = bitacoraService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<InscripcionMateria, Integer> getRepository() {
         return inscripcionMateriaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InscripcionMateria inscribir(Integer idEstudiante, Integer idGrupo) {
         Estudiante estudiante = estudianteService.buscarPorId(idEstudiante);
@@ -112,6 +144,9 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         return inscripcionMateriaRepository.save(inscripcion);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void cancelar(Integer idInscripcion) {
         InscripcionMateria inscripcion = buscarPorId(idInscripcion);
@@ -124,6 +159,9 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         inscripcion.getEstudiante().quitarInscripcion(inscripcion);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InscripcionMateria registrarNota(Integer idInscripcion, BigDecimal nota) {
         if (nota == null || nota.compareTo(NOTA_MINIMA) < 0 || nota.compareTo(NOTA_MAXIMA) > 0) {
@@ -141,12 +179,18 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         return inscripcion;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InscripcionMateria> listarPorEstudianteYEstado(Integer idEstudiante, EstadoMateria estado) {
         return inscripcionMateriaRepository.findByEstudiante_IdUsuarioAndEstado(idEstudiante, estado);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResultadoReasignacion reasignarEstudiantes(Integer idGrupoOrigen, Integer idGrupoDestino) {
         Grupo origen = grupoService.buscarPorId(idGrupoOrigen);
@@ -193,6 +237,9 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         return new ResultadoReasignacion(reasignados, noReasignados);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MatriculaPeriodo confirmarMatricula(Integer idEstudiante, Integer idPeriodo) {
         Estudiante estudiante = estudianteService.buscarPorId(idEstudiante);
@@ -216,6 +263,9 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         return matriculaPeriodoRepository.save(matricula);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InscripcionMateria> listarCargaDelPeriodo(Integer idEstudiante, Integer idPeriodo) {
@@ -225,6 +275,12 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
                 .toList();
     }
 
+    /**
+     * Verifica que el periodo no esté cerrado y la inscripción esté abierta hoy.
+     *
+     * @param periodo el periodo
+     * @throws ReglaNegocioException si no se cumple alguna condición
+     */
     private void validarPeriodoDeInscripcion(PeriodoAcademico periodo) {
         if (periodo.estaCerrado()) {
             throw new ReglaNegocioException("El periodo " + periodo.getCodigo() + " está cerrado");
@@ -235,6 +291,13 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Verifica que una cancelación no deje una matrícula confirmada por debajo del mínimo de créditos.
+     *
+     * @param inscripcion la inscripción que se cancela
+     * @param periodo el periodo
+     * @throws ReglaNegocioException si se incumple el mínimo
+     */
     private void validarMinimoTrasCancelar(InscripcionMateria inscripcion, PeriodoAcademico periodo) {
         Integer minimo = parametrosAcademicosService.obtener().getCreditosMinimos();
         if (minimo == null) {
@@ -252,6 +315,14 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Suma los créditos en curso de un estudiante en un periodo.
+     *
+     * @param estudiante el estudiante
+     * @param idPeriodo el identificador del periodo académico
+     * @param excluida una inscripción que no se cuenta, o {@code null}
+     * @return los créditos en curso
+     */
     private int creditosEnCurso(Estudiante estudiante, Integer idPeriodo, InscripcionMateria excluida) {
         return estudiante.getHistorialInscripciones().stream()
                 .filter(ins -> ins != excluida)
@@ -261,6 +332,13 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
                 .sum();
     }
 
+    /**
+     * Verifica que los correquisitos estén aprobados o en curso.
+     *
+     * @param estudiante el estudiante
+     * @param materia la materia que se inscribe
+     * @throws ReglaNegocioException si falta alguno
+     */
     private void validarCorrequisitos(Estudiante estudiante, Materia materia) {
         Set<Integer> aprobadasOCursando = estudiante.getHistorialInscripciones().stream()
                 .filter(ins -> ins.getEstado() == EstadoMateria.APROBADA || ins.getEstado() == EstadoMateria.CURSANDO)
@@ -274,6 +352,13 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Verifica que la inscripción no supere los créditos máximos configurados.
+     *
+     * @param estudiante el estudiante
+     * @param materia la materia que se inscribe
+     * @throws ReglaNegocioException si se supera el máximo
+     */
     private void validarCreditosMaximos(Estudiante estudiante, Materia materia) {
         Integer maximo = parametrosAcademicosService.obtener().getCreditosMaximos();
         if (maximo == null) {
@@ -288,6 +373,13 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Verifica que la materia no esté en curso ni aprobada.
+     *
+     * @param estudiante el estudiante
+     * @param materia la materia que se inscribe
+     * @throws ReglaNegocioException si ya la cursa o la aprobó
+     */
     private void validarHistorial(Estudiante estudiante, Materia materia) {
         for (InscripcionMateria previa : estudiante.getHistorialInscripciones()) {
             if (!previa.getGrupo().getMateria().getIdMateria().equals(materia.getIdMateria())) {
@@ -302,6 +394,13 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Verifica que los prerrequisitos estén aprobados.
+     *
+     * @param estudiante el estudiante
+     * @param materia la materia que se inscribe
+     * @throws ReglaNegocioException si falta alguno
+     */
     private void validarPrerrequisitos(Estudiante estudiante, Materia materia) {
         Set<Integer> aprobadas = estudiante.getMateriasCursadas().stream()
                 .map(Materia::getIdMateria)
@@ -314,6 +413,14 @@ public class InscripcionMateriaServiceImpl extends GenericServiceImpl<Inscripcio
         }
     }
 
+    /**
+     * Busca un cruce de horario entre las materias en curso y un grupo.
+     *
+     * @param estudiante el estudiante
+     * @param grupoNuevo el grupo evaluado
+     * @param excluida una inscripción que no se considera, o {@code null}
+     * @return la descripción del cruce, o {@code null} si no hay
+     */
     private String buscarCruce(Estudiante estudiante, Grupo grupoNuevo, InscripcionMateria excluida) {
         for (InscripcionMateria actual : estudiante.getHistorialInscripciones()) {
             if (actual == excluida || actual.getEstado() != EstadoMateria.CURSANDO) {

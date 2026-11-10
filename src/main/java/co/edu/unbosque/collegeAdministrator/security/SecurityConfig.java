@@ -24,15 +24,28 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 
+/**
+ * Configuración de Spring Security: CORS, sesión sin estado, autenticación JWT y seguridad por método.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /** El servicio que genera y lee los tokens JWT. */
     private final JwtService jwtService;
+    /** El servicio que carga los datos de seguridad del usuario. */
     private final UsuarioDetailsService usuarioDetailsService;
+    /** El origen autorizado por CORS. */
     private final String urlFrontend;
 
+    /**
+     * Crea una instancia de {@code SecurityConfig} con las dependencias requeridas.
+     *
+     * @param jwtService el servicio que genera y lee los tokens JWT
+     * @param usuarioDetailsService el servicio que carga los datos de seguridad del usuario
+     * @param urlFrontend el origen autorizado por CORS
+     */
     public SecurityConfig(JwtService jwtService, UsuarioDetailsService usuarioDetailsService,
                           @Value("${app.url-frontend}") String urlFrontend) {
         this.jwtService = jwtService;
@@ -41,6 +54,11 @@ public class SecurityConfig {
     }
 
 
+    /**
+     * Autoriza por CORS al frontend configurado.
+     *
+     * @return la configuración CORS de todas las rutas
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuracion = new CorsConfiguration();
@@ -54,16 +72,36 @@ public class SecurityConfig {
     }
 
 
+    /**
+     * Define el codificador de contraseñas BCrypt.
+     *
+     * @return el codificador de contraseñas
+     */
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Expone el administrador de autenticación de Spring.
+     *
+     * @param configuracion la configuración de autenticación
+     * @return el administrador de autenticación
+     * @throws Exception si no se puede obtener
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuracion) throws Exception {
         return configuracion.getAuthenticationManager();
     }
 
+    /**
+     * Define la cadena de filtros: rutas públicas, sesión sin estado, filtro JWT y respuesta 401 para
+     * solicitudes sin autenticar.
+     *
+     * @param http el constructor de seguridad HTTP
+     * @return la cadena de filtros
+     * @throws Exception si la configuración falla
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

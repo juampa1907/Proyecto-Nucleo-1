@@ -40,22 +40,51 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación de las operaciones sobre grupos y de las reglas de programación horaria.
+ */
 @Service
 @Transactional
 public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> implements GrupoServiceAPI {
 
+    /** El repositorio de persistencia de grupos. */
     private final GrupoRepository grupoRepository;
+    /** El repositorio de sesiones de horario. */
     private final DetalleHorarioRepository detalleHorarioRepository;
+    /** El repositorio de inscripciones de materias. */
     private final InscripcionMateriaRepository inscripcionMateriaRepository;
+    /** El servicio de gestión de materias. */
     private final MateriaServiceAPI materiaService;
+    /** El servicio de gestión de docentes. */
     private final DocenteServiceAPI docenteService;
+    /** El servicio de gestión de aulas. */
     private final AulaServiceAPI aulaService;
+    /** El servicio de gestión de periodos académicos. */
     private final PeriodoAcademicoServiceAPI periodoAcademicoService;
+    /** El servicio de parámetros académicos institucionales. */
     private final ParametrosAcademicosServiceAPI parametrosAcademicosService;
+    /** El servicio de versiones del horario. */
     private final VersionHorarioServiceAPI versionHorarioService;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
+    /** El servicio de notificaciones a usuarios. */
     private final NotificacionServiceAPI notificacionService;
 
+    /**
+     * Crea una instancia de {@code GrupoServiceImpl} con las dependencias requeridas.
+     *
+     * @param grupoRepository el repositorio de persistencia de grupos
+     * @param detalleHorarioRepository el repositorio de sesiones de horario
+     * @param inscripcionMateriaRepository el repositorio de inscripciones de materias
+     * @param materiaService el servicio de gestión de materias
+     * @param docenteService el servicio de gestión de docentes
+     * @param aulaService el servicio de gestión de aulas
+     * @param periodoAcademicoService el servicio de gestión de periodos académicos
+     * @param parametrosAcademicosService el servicio de parámetros académicos institucionales
+     * @param versionHorarioService el servicio de versiones del horario
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     * @param notificacionService el servicio de notificaciones a usuarios
+     */
     public GrupoServiceImpl(GrupoRepository grupoRepository,
                             DetalleHorarioRepository detalleHorarioRepository,
                             InscripcionMateriaRepository inscripcionMateriaRepository,
@@ -80,11 +109,17 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         this.notificacionService = notificacionService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<Grupo, Integer> getRepository() {
         return grupoRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo crearGrupo(Integer idPeriodo, Integer idMateria, String codigo, Integer cupoMaximo) {
         if (codigo == null || codigo.isBlank()) {
@@ -108,24 +143,36 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupoRepository.save(new Grupo(codigo, materia, periodo, cupo));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Grupo> listarPorPeriodo(Integer idPeriodo) {
         return grupoRepository.findByPeriodo_IdPeriodo(idPeriodo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Grupo> listarOferta(Integer idPeriodo, Integer idMateria) {
         return grupoRepository.findByPeriodo_IdPeriodoAndMateria_IdMateriaAndEstado(idPeriodo, idMateria, EstadoGrupo.ABIERTO);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Grupo> listarPorDocente(Integer idDocente, Integer idPeriodo) {
         return grupoRepository.findByDocente_IdUsuarioAndPeriodo_IdPeriodo(idDocente, idPeriodo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public long calcularCuposDisponibles(Integer idGrupo) {
@@ -133,6 +180,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo.getCupoMaximo() - inscripcionMateriaRepository.countByGrupo_IdGrupo(idGrupo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo asignarDocente(Integer idGrupo, Integer idDocente) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -150,6 +200,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo agregarSesion(Integer idGrupo, FranjaHoraria franja, Integer idAula, boolean usoExcepcional) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -163,6 +216,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
     }
 
     // HU-25: todo ocurre en la misma transacción; si la nueva posición no es válida se revierte el retiro.
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo moverSesion(Integer idGrupo, Integer idSesion, FranjaHoraria franja, Integer idAula, boolean usoExcepcional) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -177,6 +233,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo quitarSesion(Integer idGrupo, Integer idSesion) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -188,6 +247,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<String> advertenciasDiasConsecutivos(Integer idGrupo, FranjaHoraria franjaNueva) {
@@ -208,6 +270,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return advertencias;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Aula> sugerirAulas(Integer idGrupo) {
@@ -215,6 +280,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return aulaService.sugerirAulas(grupo.getCupoMaximo(), grupo.getMateria().getRequisitosAula(), null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo cerrarGrupo(Integer idGrupo) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -226,6 +294,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Grupo> listarGruposEnRiesgo(Integer idPeriodo) {
         Integer minimo = parametrosAcademicosService.obtener().getMinimoEstudiantesGrupo();
@@ -237,6 +308,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Grupo> cerrarGruposBajoMinimo(Integer idPeriodo) {
         PeriodoAcademico periodo = periodoAcademicoService.buscarPorId(idPeriodo);
@@ -254,6 +328,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return enRiesgo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public String evaluarSesion(Integer idGrupo, FranjaHoraria franja, Integer idAula) {
@@ -267,6 +344,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public String evaluarDocente(Integer idGrupo, Integer idDocente) {
@@ -283,6 +363,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo agregarSesionGenerada(Integer idGrupo, FranjaHoraria franja, Integer idAula) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -292,6 +375,9 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Grupo asignarDocenteGenerado(Integer idGrupo, Integer idDocente) {
         Grupo grupo = buscarPorId(idGrupo);
@@ -302,6 +388,16 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return grupo;
     }
 
+    /**
+     * Crea una sesión con su propia copia de la franja, porque un objeto embebible no debe compartirse entre
+     * entidades.
+     *
+     * @param grupo el grupo
+     * @param franja la franja de la sesión
+     * @param idAula el identificador del aula, o {@code null}
+     * @param usoExcepcional {@code true} si el aula es de uso excepcional
+     * @return la sesión creada
+     */
     private DetalleHorario crearSesion(Grupo grupo, FranjaHoraria franja, Integer idAula, boolean usoExcepcional) {
         Aula aula = idAula == null ? null : aulaService.buscarPorId(idAula);
         // Un @Embeddable no debe compartirse entre entidades: cada sesión lleva su propia copia de la franja.
@@ -311,6 +407,16 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         return sesion;
     }
 
+    /**
+     * Aplica las reglas de programación de una sesión: grupo abierto, parámetros institucionales, cruces,
+     * aula y docente.
+     *
+     * @param grupo el grupo
+     * @param franja la franja evaluada
+     * @param idAula el identificador del aula, o {@code null}
+     * @param usoExcepcional {@code true} si el aula es de uso excepcional
+     * @throws ReglaNegocioException si incumple alguna regla
+     */
     private void validarSesion(Grupo grupo, FranjaHoraria franja, Integer idAula, boolean usoExcepcional) {
         if (franja == null) {
             throw new ReglaNegocioException("La franja horaria es obligatoria");
@@ -331,12 +437,24 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * Verifica que un periodo no esté cerrado.
+     *
+     * @param periodo el periodo
+     * @throws ReglaNegocioException si está cerrado
+     */
     private void validarPeriodoNoCerrado(PeriodoAcademico periodo) {
         if (periodo.estaCerrado()) {
             throw new ReglaNegocioException("El periodo " + periodo.getCodigo() + " está cerrado y es de solo lectura");
         }
     }
 
+    /**
+     * Verifica que un periodo no esté cerrado ni tenga el horario publicado.
+     *
+     * @param periodo el periodo
+     * @throws ReglaNegocioException si no es editable
+     */
     private void validarHorarioEditable(PeriodoAcademico periodo) {
         validarPeriodoNoCerrado(periodo);
         if (periodo.horarioPublicado()) {
@@ -345,12 +463,25 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * Verifica que un grupo no esté cerrado.
+     *
+     * @param grupo el grupo
+     * @throws ReglaNegocioException si está cerrado
+     */
     private void validarGrupoAbierto(Grupo grupo) {
         if (grupo.getEstado() == EstadoGrupo.CERRADO) {
             throw new ReglaNegocioException("El grupo " + grupo.getCodigo() + " está cerrado");
         }
     }
 
+    /**
+     * Valida la duración, la jornada, el máximo de sesiones y las horas de la materia.
+     *
+     * @param grupo el grupo
+     * @param franja la franja evaluada
+     * @throws ReglaNegocioException si incumple algún parámetro
+     */
     private void validarFranjaConParametros(Grupo grupo, FranjaHoraria franja) {
         ParametrosAcademicos parametros = parametrosAcademicosService.obtener();
         if (franja.calcularMinutos() != parametros.getDuracionSesionMinutos()) {
@@ -372,6 +503,15 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
     }
 
 
+    /**
+     * Valida que un aula esté activa, sea compatible con el grupo y esté libre.
+     *
+     * @param aula el aula
+     * @param grupo el grupo
+     * @param franja la franja evaluada
+     * @param usoExcepcional {@code true} si el aula es de uso excepcional
+     * @throws ReglaNegocioException si el aula no es válida
+     */
     private void validarAula(Aula aula, Grupo grupo, FranjaHoraria franja, boolean usoExcepcional) {
         if (!aula.isActiva()) {
             throw new ReglaNegocioException("El aula " + aula.getCodigo() + " está inactiva");
@@ -401,6 +541,15 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
                 });
     }
 
+    /**
+     * Valida la habilitación, las restricciones, los cruces y las horas disponibles de un docente.
+     *
+     * @param docente el docente
+     * @param grupo el grupo
+     * @param franjas las franjas evaluadas
+     * @param horasNuevas las horas que se le agregarían
+     * @throws ReglaNegocioException si el docente no cumple alguna regla
+     */
     private void validarDocente(Docente docente, Grupo grupo, List<FranjaHoraria> franjas, double horasNuevas) {
         boolean habilitado = docente.getMateriasHabilitadas().stream()
                 .anyMatch(m -> m.getIdMateria().equals(grupo.getMateria().getIdMateria()));
@@ -440,6 +589,11 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * Notifica a los estudiantes en curso el cierre de un grupo e indica los grupos alternativos con cupo.
+     *
+     * @param grupo el grupo cerrado
+     */
     private void notificarCierre(Grupo grupo) {
         List<InscripcionMateria> afectados = inscripcionMateriaRepository.findByGrupo_IdGrupoAndEstado(
                 grupo.getIdGrupo(), EstadoMateria.CURSANDO);
@@ -462,6 +616,14 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
         }
     }
 
+    /**
+     * Busca una sesión dentro de un grupo.
+     *
+     * @param grupo el grupo
+     * @param idSesion el identificador de la sesión del grupo
+     * @return la sesión encontrada
+     * @throws RecursoNoEncontradoException si el grupo no tiene esa sesión
+     */
     private DetalleHorario buscarSesion(Grupo grupo, Integer idSesion) {
         return grupo.getSesiones().stream()
                 .filter(s -> s.getIdDetalleHorario().equals(idSesion))
@@ -469,14 +631,32 @@ public class GrupoServiceImpl extends GenericServiceImpl<Grupo, Integer> impleme
                 .orElseThrow(() -> new RecursoNoEncontradoException("El grupo no tiene una sesión con id " + idSesion));
     }
 
+    /**
+     * Obtiene las franjas de un grupo.
+     *
+     * @param grupo el grupo
+     * @return las franjas de sus sesiones
+     */
     private List<FranjaHoraria> franjasDe(Grupo grupo) {
         return grupo.getSesiones().stream().map(DetalleHorario::getFranja).toList();
     }
 
+    /**
+     * Describe un grupo con su materia y código.
+     *
+     * @param grupo el grupo
+     * @return la descripción del grupo
+     */
     private String describir(Grupo grupo) {
         return grupo.getMateria().getNombre() + " (grupo " + grupo.getCodigo() + ")";
     }
 
+    /**
+     * Genera el texto del aula para la bitácora.
+     *
+     * @param aula el aula, o {@code null}
+     * @return el texto con el código del aula, o vacío si no hay aula
+     */
     private String aulaTexto(Aula aula) {
         return aula == null ? "" : " en " + aula.getCodigo();
     }

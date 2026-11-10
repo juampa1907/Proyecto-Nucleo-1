@@ -17,19 +17,41 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
+/**
+ * Carga los datos mínimos de la aplicación al arrancar.
+ */
 @Component
 public class DatosIniciales implements CommandLineRunner {
 
+    /** El registrador de eventos de la clase. */
     private static final Logger LOG = LoggerFactory.getLogger(DatosIniciales.class);
 
+    /** El servicio de parámetros académicos institucionales. */
     private final ParametrosAcademicosServiceAPI parametrosAcademicosService;
+    /** El repositorio de los topes de inventario de aulas. */
     private final LimiteInventarioAulaRepository limiteInventarioAulaRepository;
+    /** El repositorio de persistencia de usuarios. */
     private final UsuarioRepository usuarioRepository;
+    /** El servicio de gestión de usuarios. */
     private final UsuarioServiceAPI usuarioService;
+    /** El nombre del administrador inicial. */
     private final String adminUsername;
+    /** El correo del administrador inicial. */
     private final String adminCorreo;
+    /** La contraseña del administrador inicial. */
     private final String adminPassword;
 
+    /**
+     * Crea una instancia de {@code DatosIniciales} con las dependencias requeridas.
+     *
+     * @param parametrosAcademicosService el servicio de parámetros académicos institucionales
+     * @param limiteInventarioAulaRepository el repositorio de los topes de inventario de aulas
+     * @param usuarioRepository el repositorio de persistencia de usuarios
+     * @param usuarioService el servicio de gestión de usuarios
+     * @param adminUsername el nombre del administrador inicial
+     * @param adminCorreo el correo del administrador inicial
+     * @param adminPassword la contraseña del administrador inicial
+     */
     public DatosIniciales(ParametrosAcademicosServiceAPI parametrosAcademicosService,
                           LimiteInventarioAulaRepository limiteInventarioAulaRepository,
                           UsuarioRepository usuarioRepository,
@@ -46,6 +68,12 @@ public class DatosIniciales implements CommandLineRunner {
         this.adminPassword = adminPassword;
     }
 
+    /**
+     * Asegura que existan los parámetros académicos, carga los topes de inventario si no hay ninguno y crea
+     * el administrador inicial si no hay usuarios.
+     *
+     * @param args los argumentos de arranque; no se usan
+     */
     @Override
     @Transactional
     public void run(String... args) {

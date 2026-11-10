@@ -7,6 +7,12 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 
+/**
+ * Datos para actualizar un estudiante.
+ *
+ * @param correo el correo electrónico del usuario
+ * @param numeroSemestre el semestre que cursa el estudiante
+ */
 public record EstudianteActualizacionRequest(
         @NotBlank @Email @Size(max = 255) String correo,
         @NotNull @Positive Integer numeroSemestre) {

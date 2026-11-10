@@ -42,21 +42,45 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación de la generación de reportes.
+ */
 @Service
 @Transactional
 public class ReporteServiceImpl implements ReporteServiceAPI {
 
+    /** Etiqueta para docentes sin tipo de vinculación. */
     private static final String SIN_VINCULACION = "Sin vinculación";
 
+    /** El servicio de gestión de periodos académicos. */
     private final PeriodoAcademicoServiceAPI periodoAcademicoService;
+    /** El servicio de parámetros académicos institucionales. */
     private final ParametrosAcademicosServiceAPI parametrosAcademicosService;
+    /** El servicio de gestión de grupos y sesiones. */
     private final GrupoServiceAPI grupoService;
+    /** El servicio de gestión de docentes. */
     private final DocenteServiceAPI docenteService;
+    /** El servicio de gestión de aulas. */
     private final AulaServiceAPI aulaService;
+    /** El servicio de presupuestos por vinculación. */
     private final PresupuestoVinculacionServiceAPI presupuestoVinculacionService;
+    /** El repositorio de sesiones de horario. */
     private final DetalleHorarioRepository detalleHorarioRepository;
+    /** El repositorio de inscripciones de materias. */
     private final InscripcionMateriaRepository inscripcionMateriaRepository;
 
+    /**
+     * Crea una instancia de {@code ReporteServiceImpl} con las dependencias requeridas.
+     *
+     * @param periodoAcademicoService el servicio de gestión de periodos académicos
+     * @param parametrosAcademicosService el servicio de parámetros académicos institucionales
+     * @param grupoService el servicio de gestión de grupos y sesiones
+     * @param docenteService el servicio de gestión de docentes
+     * @param aulaService el servicio de gestión de aulas
+     * @param presupuestoVinculacionService el servicio de presupuestos por vinculación
+     * @param detalleHorarioRepository el repositorio de sesiones de horario
+     * @param inscripcionMateriaRepository el repositorio de inscripciones de materias
+     */
     public ReporteServiceImpl(PeriodoAcademicoServiceAPI periodoAcademicoService,
                               ParametrosAcademicosServiceAPI parametrosAcademicosService,
                               GrupoServiceAPI grupoService,
@@ -75,6 +99,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         this.inscripcionMateriaRepository = inscripcionMateriaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<OcupacionAula> ocupacionAulas(Integer idPeriodo, Bloque bloque, DiaSemana dia, LocalTime desde, LocalTime hasta) {
         periodoAcademicoService.buscarPorId(idPeriodo);
@@ -108,6 +135,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return resultado;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ReporteCargaDocente cargaDocente(Integer idPeriodo) {
         periodoAcademicoService.buscarPorId(idPeriodo);
@@ -138,6 +168,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return new ReporteCargaDocente(docentes, porVinculacion);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EstadoGrupos estadoGrupos(Integer idPeriodo) {
         periodoAcademicoService.buscarPorId(idPeriodo);
@@ -161,6 +194,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return new EstadoGrupos(abiertos, cerrados, enRiesgo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TablaReporte tablaOcupacionAulas(Integer idPeriodo, Bloque bloque, DiaSemana dia, LocalTime desde, LocalTime hasta) {
         List<List<String>> filas = ocupacionAulas(idPeriodo, bloque, dia, desde, hasta).stream()
@@ -173,6 +209,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
                 List.of("Edificio", "Aula", "Tipo", "Sesiones", "Horas ocupadas", "Ocupación"), filas);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TablaReporte tablaCargaDocente(Integer idPeriodo) {
         List<List<String>> filas = new ArrayList<>();
@@ -192,6 +231,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
                 List.of("Vinculación", "Docente", "Horas máximas", "Horas asignadas", "Indicador"), filas);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TablaReporte tablaEstadoGrupos(Integer idPeriodo) {
         EstadoGrupos estado = estadoGrupos(idPeriodo);
@@ -203,6 +245,9 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
                 List.of("Estado", "Materia", "Grupo", "Docente", "Inscritos", "Cupo"), filas);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TablaReporte horarioPeriodo(Integer idPeriodo) {
         List<List<String>> filas = new ArrayList<>();
@@ -229,6 +274,14 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
                 List.of("Materia", "Grupo", "Docente", "Día", "Inicio", "Fin", "Aula", "Edificio"), filas);
     }
 
+    /**
+     * Clasifica la carga de un docente.
+     *
+     * @param asignadas las horas asignadas
+     * @param maximas las horas máximas, o {@code null} si no tiene vinculación
+     * @param umbralPorcentaje el umbral de subutilización
+     * @return el indicador de carga
+     */
     private IndicadorCarga indicador(double asignadas, Integer maximas, int umbralPorcentaje) {
         if (maximas == null) {
             return IndicadorCarga.SIN_VINCULACION;
@@ -242,6 +295,15 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return IndicadorCarga.ADECUADO;
     }
 
+    /**
+     * Calcula las horas hábiles de una ventana, sin contar el almuerzo.
+     *
+     * @param parametros los parámetros académicos
+     * @param diaFiltro el día considerado, o {@code null} para todos
+     * @param desde la hora inicial
+     * @param hasta la hora final
+     * @return las horas disponibles
+     */
     private double horasDisponibles(ParametrosAcademicos parametros, DiaSemana diaFiltro, LocalTime desde, LocalTime hasta) {
         long minutos = 0;
         for (DiaSemana dia : DiaSemana.values()) {
@@ -262,12 +324,28 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         return minutos / 60.0;
     }
 
+    /**
+     * Calcula los minutos comunes entre dos intervalos.
+     *
+     * @param inicioA el inicio del primer intervalo
+     * @param finA el fin del primer intervalo
+     * @param inicioB el inicio del segundo intervalo
+     * @param finB el fin del segundo intervalo
+     * @return los minutos solapados, o 0 si no se solapan
+     */
     private long minutosSolapados(LocalTime inicioA, LocalTime finA, LocalTime inicioB, LocalTime finB) {
         LocalTime inicio = inicioA.isAfter(inicioB) ? inicioA : inicioB;
         LocalTime fin = finA.isBefore(finB) ? finA : finB;
         return inicio.isBefore(fin) ? Duration.between(inicio, fin).toMinutes() : 0;
     }
 
+    /**
+     * Agrega a la tabla una fila por cada grupo.
+     *
+     * @param filas las filas de la tabla
+     * @param grupos los grupos
+     * @param estado la etiqueta de estado de las filas
+     */
     private void agregarFilasGrupos(List<List<String>> filas, List<ResumenGrupo> grupos, String estado) {
         for (ResumenGrupo grupo : grupos) {
             filas.add(List.of(estado, grupo.materia(), grupo.codigo(), grupo.docente() == null ? "Por asignar" : grupo.docente(),
@@ -275,15 +353,33 @@ public class ReporteServiceImpl implements ReporteServiceAPI {
         }
     }
 
+    /**
+     * Genera la etiqueta de un periodo.
+     *
+     * @param idPeriodo el identificador del periodo académico
+     * @return el texto con el código del periodo
+     */
     private String codigoPeriodo(Integer idPeriodo) {
         PeriodoAcademico periodo = periodoAcademicoService.buscarPorId(idPeriodo);
         return "Periodo " + periodo.getCodigo();
     }
 
+    /**
+     * Redondea un valor a un decimal.
+     *
+     * @param valor el valor
+     * @return el valor redondeado
+     */
     private double redondear(double valor) {
         return Math.round(valor * 10) / 10.0;
     }
 
+    /**
+     * Da formato a un valor con un decimal.
+     *
+     * @param valor el valor
+     * @return el valor con formato
+     */
     private String formatear(double valor) {
         return String.format(Locale.ROOT, "%.1f", valor);
     }

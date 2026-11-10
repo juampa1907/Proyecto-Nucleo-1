@@ -13,21 +13,38 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Implementación de las operaciones sobre materias y sus requisitos.
+ */
 @Service
 @Transactional
 public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> implements MateriaServiceAPI {
 
+    /** El repositorio de persistencia de materias. */
     private final MateriaRepository materiaRepository;
 
+    /**
+     * Crea una instancia de {@code MateriaServiceImpl} con las dependencias requeridas.
+     *
+     * @param materiaRepository el repositorio de persistencia de materias
+     */
     public MateriaServiceImpl(MateriaRepository materiaRepository) {
         this.materiaRepository = materiaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<Materia, Integer> getRepository() {
         return materiaRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Exige código, créditos y horas válidos; al crear, impide códigos y nombres repetidos.
+     */
     @Override
     public Materia guardar(Materia materia) {
         if (materia.getCodigo() == null || materia.getCodigo().isBlank()) {
@@ -50,12 +67,18 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
         return super.guardar(materia);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Materia> buscarPorNombre(String nombre) {
         return materiaRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia agregarPrerrequisito(Integer idMateria, Integer idPrerrequisito) {
         validarDistintas(idMateria, idPrerrequisito, "prerrequisito");
@@ -75,6 +98,9 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
         return materia;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia quitarPrerrequisito(Integer idMateria, Integer idPrerrequisito) {
         Materia materia = buscarPorId(idMateria);
@@ -84,6 +110,9 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
     }
 
     // HU-15: un correquisito se cursa en el mismo periodo o ya debe estar aprobado.
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia agregarCorrequisito(Integer idMateria, Integer idCorrequisito) {
         validarDistintas(idMateria, idCorrequisito, "correquisito");
@@ -99,6 +128,9 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
         return materia;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia quitarCorrequisito(Integer idMateria, Integer idCorrequisito) {
         Materia materia = buscarPorId(idMateria);
@@ -108,6 +140,9 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
     }
 
     // HU-13 / RF-15: requisitos especiales de aula.
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia agregarRequisitoAula(Integer idMateria, CaracteristicaAula requisito) {
         if (requisito == null) {
@@ -118,6 +153,9 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
         return materia;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Materia quitarRequisitoAula(Integer idMateria, CaracteristicaAula requisito) {
         Materia materia = buscarPorId(idMateria);
@@ -125,16 +163,41 @@ public class MateriaServiceImpl extends GenericServiceImpl<Materia, Integer> imp
         return materia;
     }
 
+    /**
+     * Verifica que una materia no se relacione consigo misma.
+     *
+     * @param idMateria el identificador de la materia
+     * @param idOtra el identificador de la otra materia
+     * @param relacion el nombre de la relación
+     * @throws ReglaNegocioException si ambas son la misma materia
+     */
     private void validarDistintas(Integer idMateria, Integer idOtra, String relacion) {
         if (idMateria.equals(idOtra)) {
             throw new ReglaNegocioException("Una materia no puede ser " + relacion + " de sí misma");
         }
     }
 
+    /**
+     * Indica si una colección contiene una materia.
+     *
+     * @param materias la colección de materias
+     * @param idMateria el identificador de la materia
+     * @return {@code true} si la contiene
+     */
     private boolean contieneMateria(Collection<Materia> materias, Integer idMateria) {
         return materias.stream().anyMatch(m -> m.getIdMateria().equals(idMateria));
     }
 
+    /**
+     * Busca una materia dentro de una relación.
+     *
+     * @param materias las materias de la relación
+     * @param idBuscada el identificador buscado
+     * @param relacion el nombre de la relación
+     * @param materia la materia dueña de la relación
+     * @return la materia encontrada
+     * @throws ReglaNegocioException si no forma parte de la relación
+     */
     private Materia buscarEn(Collection<Materia> materias, Integer idBuscada, String relacion, Materia materia) {
         return materias.stream()
                 .filter(m -> m.getIdMateria().equals(idBuscada))

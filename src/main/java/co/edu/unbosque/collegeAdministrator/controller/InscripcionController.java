@@ -23,18 +23,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controlador REST de las inscripciones y la matrícula.
+ */
 @RestController
 @RequestMapping("/api/inscripciones")
 public class InscripcionController {
 
+    /** El servicio de inscripción de materias. */
     private final InscripcionMateriaServiceAPI inscripcionMateriaService;
+    /** El componente que da acceso al usuario autenticado. */
     private final UsuarioActual usuarioActual;
 
+    /**
+     * Crea una instancia de {@code InscripcionController} con las dependencias requeridas.
+     *
+     * @param inscripcionMateriaService el servicio de inscripción de materias
+     * @param usuarioActual el componente que da acceso al usuario autenticado
+     */
     public InscripcionController(InscripcionMateriaServiceAPI inscripcionMateriaService, UsuarioActual usuarioActual) {
         this.inscripcionMateriaService = inscripcionMateriaService;
         this.usuarioActual = usuarioActual;
     }
 
+    /**
+     * Inscribe al estudiante autenticado en un grupo.
+     *
+     * <p>Endpoint: {@code POST /api/inscripciones}. Acceso: estudiante.
+     *
+     * @param request el grupo elegido
+     * @return la respuesta 201 con la inscripción creada
+     */
     @PostMapping
     @PreAuthorize(Permisos.ESTUDIANTE)
     public ResponseEntity<InscripcionResponse> inscribir(@Valid @RequestBody InscripcionRequest request) {
@@ -42,6 +61,14 @@ public class InscripcionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(InscripcionMapper.aResponse(inscripcion));
     }
 
+    /**
+     * Cancela una inscripción propia o, para un administrador, de cualquier estudiante.
+     *
+     * <p>Endpoint: {@code DELETE /api/inscripciones/{id}}. Acceso: estudiante o administrador.
+     *
+     * @param id el identificador de la inscripción
+     * @return la respuesta 204
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize(Permisos.ESTUDIANTE_O_ADMIN)
     public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
@@ -52,6 +79,16 @@ public class InscripcionController {
     }
 
 
+    /**
+     * Registra una nota; solo el docente del grupo o un administrador.
+     *
+     * <p>Endpoint: {@code PUT /api/inscripciones/{id}/nota}. Acceso: docente o administrador.
+     *
+     * @param id el identificador de la inscripción
+     * @param request la nota validada
+     * @return la inscripción actualizada
+     * @throws AccesoDenegadoException si el docente autenticado no es el del grupo
+     */
     @PutMapping("/{id}/nota")
     @PreAuthorize(Permisos.DOCENTE_O_ADMIN)
     public InscripcionResponse registrarNota(@PathVariable Integer id, @Valid @RequestBody NotaRequest request) {
@@ -66,6 +103,14 @@ public class InscripcionController {
     }
 
     // HU-38: el estudiante confirma su matrícula del periodo (valida créditos mínimos y máximos).
+    /**
+     * Confirma la matrícula del estudiante autenticado (HU-38).
+     *
+     * <p>Endpoint: {@code POST /api/inscripciones/matricula}. Acceso: estudiante.
+     *
+     * @param idPeriodo el identificador del periodo académico
+     * @return la matrícula confirmada
+     */
     @PostMapping("/matricula")
     @PreAuthorize(Permisos.ESTUDIANTE)
     public MatriculaResponse confirmarMatricula(@RequestParam Integer idPeriodo) {

@@ -25,16 +25,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementación del versionado del horario.
+ */
 @Service
 @Transactional
 public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
 
+    /** El repositorio de versiones del horario. */
     private final VersionHorarioRepository versionHorarioRepository;
+    /** El repositorio de periodos académicos. */
     private final PeriodoAcademicoRepository periodoAcademicoRepository;
+    /** El repositorio de persistencia de grupos. */
     private final GrupoRepository grupoRepository;
+    /** El componente que da acceso al usuario autenticado. */
     private final UsuarioActual usuarioActual;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
 
+    /**
+     * Crea una instancia de {@code VersionHorarioServiceImpl} con las dependencias requeridas.
+     *
+     * @param versionHorarioRepository el repositorio de versiones del horario
+     * @param periodoAcademicoRepository el repositorio de periodos académicos
+     * @param grupoRepository el repositorio de persistencia de grupos
+     * @param usuarioActual el componente que da acceso al usuario autenticado
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     */
     public VersionHorarioServiceImpl(VersionHorarioRepository versionHorarioRepository,
                                      PeriodoAcademicoRepository periodoAcademicoRepository,
                                      GrupoRepository grupoRepository,
@@ -47,6 +64,9 @@ public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
         this.bitacoraService = bitacoraService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public VersionHorario guardarVersion(Integer idPeriodo, String descripcion) {
         PeriodoAcademico periodo = periodoAcademicoRepository.findById(idPeriodo)
@@ -68,12 +88,21 @@ public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
         return guardada;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<VersionHorario> listarVersiones(Integer idPeriodo) {
         return versionHorarioRepository.findByPeriodo_IdPeriodoOrderByNumeroDesc(idPeriodo);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Los grupos creados después de la versión quedan sin docente ni sesiones, como estaban en ese
+     * momento.
+     */
     @Override
     public VersionHorario restaurar(Integer idVersion) {
         VersionHorario version = versionHorarioRepository.findById(idVersion)
@@ -108,6 +137,11 @@ public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
         return respaldo;
     }
 
+    /**
+     * Elimina las versiones que excedan el máximo permitido.
+     *
+     * @param idPeriodo el identificador del periodo académico
+     */
     private void eliminarVersionesAntiguas(Integer idPeriodo) {
         List<VersionHorario> versiones = versionHorarioRepository.findByPeriodo_IdPeriodoOrderByNumeroDesc(idPeriodo);
         if (versiones.size() > MAX_VERSIONES) {
@@ -115,13 +149,32 @@ public class VersionHorarioServiceImpl implements VersionHorarioServiceAPI {
         }
     }
 
+    /**
+     * Crea una copia independiente de una franja.
+     *
+     * @param franja la franja original
+     * @return la copia de la franja
+     */
     private FranjaHoraria copiar(FranjaHoraria franja) {
         return new FranjaHoraria(franja.getDiaSemana(), franja.getHoraInicio(), franja.getHoraFin());
     }
 
+    /**
+     * Copia en memoria de una sesión guardada.
+     *
+     * @param franja la franja horaria
+     * @param aula el aula, o {@code null} si no tenía
+     * @param usoExcepcional {@code true} si el aula era de uso excepcional
+     */
     private record SesionGuardada(FranjaHoraria franja, Aula aula, boolean usoExcepcional) {
     }
 
+    /**
+     * Estado guardado de un grupo.
+     *
+     * @param docente el docente, o {@code null} si no tenía
+     * @param sesiones las sesiones guardadas
+     */
     private record EstadoGrupo(Docente docente, List<SesionGuardada> sesiones) {
     }
 }

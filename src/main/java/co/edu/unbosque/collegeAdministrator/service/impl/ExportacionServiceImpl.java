@@ -27,12 +27,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Implementación de la exportación de tablas a PDF con OpenPDF y a Excel con Apache POI.
+ */
 @Service
 public class ExportacionServiceImpl implements ExportacionServiceAPI {
 
+    /** Formato de la fecha de generación de los archivos. */
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    /** Color de fondo de los encabezados en PDF. */
     private static final Color GRIS_ENCABEZADO = new Color(220, 220, 220);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] exportarPdf(TablaReporte tabla) {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
@@ -67,6 +75,14 @@ public class ExportacionServiceImpl implements ExportacionServiceAPI {
         return salida.toByteArray();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Escribe el título y la fecha al inicio de la hoja, los encabezados en la cuarta fila y los datos a
+     * continuación.
+     *
+     * @throws java.io.UncheckedIOException si no se puede generar el archivo
+     */
     @Override
     public byte[] exportarExcel(TablaReporte tabla) {
         try (XSSFWorkbook libro = new XSSFWorkbook(); ByteArrayOutputStream salida = new ByteArrayOutputStream()) {

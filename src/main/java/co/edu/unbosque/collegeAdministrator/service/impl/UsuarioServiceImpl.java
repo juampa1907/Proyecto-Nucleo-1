@@ -15,19 +15,35 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Implementación de las operaciones sobre usuarios, roles y credenciales.
+ */
 @Service
 @Transactional
 public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> implements UsuarioServiceAPI {
 
+    /** Intentos fallidos permitidos antes del bloqueo temporal. */
     static final int MAX_INTENTOS = 3;
+    /** Duración en minutos del bloqueo temporal. */
     static final int MINUTOS_BLOQUEO = 15;
 
+    /** Longitud mínima de la contraseña. */
     static final int LONGITUD_MINIMA_PASSWORD = 8;
 
+    /** El repositorio de persistencia de usuarios. */
     private final UsuarioRepository usuarioRepository;
+    /** El codificador usado para cifrar y comparar contraseñas. */
     private final PasswordEncoder passwordEncoder;
+    /** El servicio de auditoría donde se registran las acciones. */
     private final BitacoraServiceAPI bitacoraService;
 
+    /**
+     * Crea una instancia de {@code UsuarioServiceImpl} con las dependencias requeridas.
+     *
+     * @param usuarioRepository el repositorio de persistencia de usuarios
+     * @param passwordEncoder el codificador usado para cifrar y comparar contraseñas
+     * @param bitacoraService el servicio de auditoría donde se registran las acciones
+     */
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
                               PasswordEncoder passwordEncoder,
                               BitacoraServiceAPI bitacoraService) {
@@ -36,11 +52,19 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         this.bitacoraService = bitacoraService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected JpaRepository<Usuario, Integer> getRepository() {
         return usuarioRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Al crear un usuario valida sus datos y cifra su contraseña.
+     */
     @Override
     public Usuario guardar(Usuario usuario) {
         if (usuario.getIdUsuario() == null) {
@@ -49,6 +73,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return super.guardar(usuario);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void prepararNuevoUsuario(Usuario usuario) {
         validarDatosUnicos(usuario.getUsername(), usuario.getCorreo());
@@ -56,6 +83,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario crearAdministrador(String username, String correo, String password) {
         Usuario administrador = new Usuario(username, correo, password);
@@ -65,6 +95,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return guardado;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario asignarRol(Integer idUsuario, Rol rol) {
         Usuario usuario = buscarPorId(idUsuario);
@@ -73,6 +106,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return usuario;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario quitarRol(Integer idUsuario, Rol rol) {
         Usuario usuario = buscarPorId(idUsuario);
@@ -81,6 +117,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return usuario;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario cambiarPassword(Integer idUsuario, String passwordActual, String passwordNueva) {
         Usuario usuario = buscarPorId(idUsuario);
@@ -92,6 +131,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return usuario;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void validarPassword(String password) {
         if (password == null || password.length() < LONGITUD_MINIMA_PASSWORD) {
@@ -99,6 +141,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Usuario buscarPorUsername(String username) {
@@ -106,6 +151,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el usuario " + username));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public void validarDatosUnicos(String username, String correo) {
@@ -117,6 +165,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario registrarInicioSesion(String username, String ip) {
         Usuario usuario = buscarPorUsername(username);
@@ -130,6 +181,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return usuario;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario registrarIntentoFallido(String username) {
         Usuario usuario = buscarPorUsername(username);
@@ -143,6 +197,9 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, Integer> imp
         return usuario;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean estaBloqueado(Usuario usuario) {
         return usuario.getBloqueadoHasta() != null && usuario.getBloqueadoHasta().isAfter(LocalDateTime.now());

@@ -22,25 +22,55 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * Conversiones entre las entidades académicas y sus objetos de transferencia de datos.
+ */
 public final class AcademicoMapper {
 
+    /**
+     * Constructor privado: esta clase no debe instanciarse.
+     */
     private AcademicoMapper() {
     }
 
+    /**
+     * Convierte una materia en su resumen.
+     *
+     * @param materia la materia
+     * @return el resumen de la materia
+     */
     public static MateriaResumen aResumen(Materia materia) {
         return new MateriaResumen(materia.getIdMateria(), materia.getCodigo(), materia.getNombre());
     }
 
+    /**
+     * Convierte una materia en su respuesta.
+     *
+     * @param materia la materia
+     * @return la respuesta con los prerrequisitos y correquisitos ordenados por código
+     */
     public static MateriaResponse aResponse(Materia materia) {
         return new MateriaResponse(materia.getIdMateria(), materia.getCodigo(), materia.getNombre(),
                 materia.getNumeroCreditos(), materia.getHorasSemanales(), materia.getRequisitosAula(),
                 resumenes(materia.getPrerrequisitos()), resumenes(materia.getCorrequisitos()));
     }
 
+    /**
+     * Crea una materia a partir de la solicitud.
+     *
+     * @param request los datos de la materia
+     * @return la materia sin persistir
+     */
     public static Materia nuevaMateria(MateriaRequest request) {
         return new Materia(request.codigo(), request.nombre(), request.numeroCreditos(), request.horasSemanales());
     }
 
+    /**
+     * Copia los datos de la solicitud en una materia existente.
+     *
+     * @param request los datos nuevos
+     * @param materia la materia que se actualiza
+     */
     public static void aplicar(MateriaRequest request, Materia materia) {
         materia.setCodigo(request.codigo());
         materia.setNombre(request.nombre());
@@ -48,11 +78,23 @@ public final class AcademicoMapper {
         materia.setHorasSemanales(request.horasSemanales());
     }
 
+    /**
+     * Convierte un aula en su respuesta.
+     *
+     * @param aula el aula
+     * @return la respuesta con los datos del aula
+     */
     public static AulaResponse aResponse(Aula aula) {
         return new AulaResponse(aula.getIdAula(), aula.getCodigo(), aula.getCapacidad(), aula.getTipoEspacio(),
                 aula.getBloque(), aula.getBloque().getSede(), aula.getCaracteristicas(), aula.isActiva());
     }
 
+    /**
+     * Crea un aula a partir de la solicitud.
+     *
+     * @param request los datos del aula
+     * @return el aula sin persistir
+     */
     public static Aula nuevaAula(AulaRequest request) {
         Aula aula = new Aula(request.codigo(), request.capacidad(), request.tipoEspacio(), request.bloque());
         if (request.caracteristicas() != null) {
@@ -62,6 +104,12 @@ public final class AcademicoMapper {
     }
 
     // Reemplaza las características con las del request usando los métodos agregar/quitar de la entidad.
+    /**
+     * Copia los datos de la solicitud en un aula existente y reemplaza sus características.
+     *
+     * @param request los datos nuevos
+     * @param aula el aula que se actualiza
+     */
     public static void aplicar(AulaRequest request, Aula aula) {
         aula.setCodigo(request.codigo());
         aula.setCapacidad(request.capacidad());
@@ -74,17 +122,35 @@ public final class AcademicoMapper {
         nuevas.forEach(aula::agregarCaracteristica);
     }
 
+    /**
+     * Convierte un periodo en su respuesta.
+     *
+     * @param periodo el periodo
+     * @return la respuesta con los datos del periodo
+     */
     public static PeriodoResponse aResponse(PeriodoAcademico periodo) {
         return new PeriodoResponse(periodo.getIdPeriodo(), periodo.getCodigo(), periodo.getFechaInicio(),
                 periodo.getFechaFin(), periodo.getFechaAperturaInscripcion(), periodo.getFechaCierreInscripcion(),
                 periodo.getEstado(), periodo.getEstadoHorario());
     }
 
+    /**
+     * Crea un periodo a partir de la solicitud.
+     *
+     * @param request los datos del periodo
+     * @return el periodo sin persistir
+     */
     public static PeriodoAcademico nuevoPeriodo(PeriodoRequest request) {
         return new PeriodoAcademico(request.codigo(), request.fechaInicio(), request.fechaFin(),
                 request.fechaAperturaInscripcion(), request.fechaCierreInscripcion());
     }
 
+    /**
+     * Copia los datos de la solicitud en un periodo existente.
+     *
+     * @param request los datos nuevos
+     * @param periodo el periodo que se actualiza
+     */
     public static void aplicar(PeriodoRequest request, PeriodoAcademico periodo) {
         periodo.setCodigo(request.codigo());
         periodo.setFechaInicio(request.fechaInicio());
@@ -93,6 +159,12 @@ public final class AcademicoMapper {
         periodo.setFechaCierreInscripcion(request.fechaCierreInscripcion());
     }
 
+    /**
+     * Convierte los parámetros académicos en su respuesta.
+     *
+     * @param p los parámetros académicos
+     * @return la respuesta con los parámetros y el cupo máximo calculado
+     */
     public static ParametrosResponse aResponse(ParametrosAcademicos p) {
         return new ParametrosResponse(p.getTamanoMaximoGrupo(), p.getToleranciaCupoPorcentaje(),
                 p.calcularCupoMaximoPermitido(), p.getMinimoEstudiantesGrupo(), p.getHoraInicioSemana(),
@@ -101,6 +173,12 @@ public final class AcademicoMapper {
                 p.getCreditosMaximos(), p.getDiasAnticipacionAviso(), p.getUmbralSubutilizacionPorcentaje());
     }
 
+    /**
+     * Crea un objeto de parámetros a partir de la solicitud.
+     *
+     * @param r los datos de los parámetros
+     * @return los parámetros sin persistir
+     */
     public static ParametrosAcademicos aParametros(ParametrosRequest r) {
         ParametrosAcademicos p = new ParametrosAcademicos();
         p.setTamanoMaximoGrupo(r.tamanoMaximoGrupo());
@@ -121,6 +199,12 @@ public final class AcademicoMapper {
         return p;
     }
 
+    /**
+     * Convierte materias en resúmenes ordenados por código.
+     *
+     * @param materias las materias
+     * @return los resúmenes ordenados
+     */
     private static List<MateriaResumen> resumenes(Collection<Materia> materias) {
         return materias.stream()
                 .map(AcademicoMapper::aResumen)
